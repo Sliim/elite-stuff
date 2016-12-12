@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+tokens = client.call('auth.token_list', [])["tokens"]
+
+for t in tokens:
+    print "Removing token %s.. %s" % (t, client.call("auth.token_remove",
+                                                     [t])["result"])

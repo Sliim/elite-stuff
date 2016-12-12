@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+data = ""
+
+def collect_data():
+    def append(d, extra=True):
+        global data
+        if not extra or (extra and not args.list):
+            data += d
+
+    jobs = client.call('job.list', [])
+    total = 0
+    append("msf> Active jobs:\n----------\n")
+    for j in jobs:
+        total += 1
+        jinfo = client.call('job.info', [j])
+        if not rpcutils.check_resp(jinfo): continue
+
+        append("%s - %s " % (jinfo.get("jid"),
+                             jinfo.get("name")), False)
+        if jinfo.get("datastore").get("LPORT"):
+            append("- %s %s:%s" % (jinfo.get("datastore").get("PAYLOAD"),
+                                     jinfo.get("datastore").get("LHOST"),
+                                     jinfo.get("datastore").get("LPORT")), False)
+        elif jinfo.get("datastore").get("RPORT"):
+            append("- %s %s:%s" % (jinfo.get("datastore").get("PAYLOAD"),
+                                     jinfo.get("datastore").get("RHOST"),
+                                     jinfo.get("datastore").get("RPORT")), False)
+        append("\n", False)
+
+    append("----------\nTotal: %d" % total)
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

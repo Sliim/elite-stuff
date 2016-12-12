@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+sessions = client.call('session.list', [])
+for s in sessions:
+    print "Killing session ID %s.. %s" % (s, client.call("session.stop",
+                                                         [s])["result"])

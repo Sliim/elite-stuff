@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+#
+# Usage:
+#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor exploit RHOST=192.168.42.11;RPORT=21;TARGET=0
+#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor check RHOST=192.168.42.11;RPORT=21;TARGET=0
+#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor options
+#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor info
+#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor "show targets"
+#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor "show payloads"
+#
+
+from os import sys, path
+import time
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+
+if len(sys.argv) < 3:
+    print 'What?!'
+    exit(1)
+
+cmds = []
+cid = client.call("console.create", [{}])["id"]
+client.call("console.read", [cid])
+cmds.append("use %s" % sys.argv[1])
+if len(sys.argv) == 4:
+    opts = sys.argv[3].split(";")
+    for o in opts:
+        o = o.split("=")
+        cmds.append("set %s %s" % (o[0], o[1]))
+
+cmds.append(sys.argv[2])
+cmds.append("")
+
+client.call("console.write", [cid, "\r\n".join(cmds)])
+while True:
+    time.sleep(2)
+    r = client.call("console.read", [cid])
+    if r.get("data"):
+        print r.get("data")
+    elif not r.get("busy"):
+        break
+
+client.call("console.destroy", [cid])

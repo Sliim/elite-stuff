@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path, environ
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+
+def collect_data():
+    data = ""
+    jobs = len(client.call('job.list', []))
+    sessions = len(client.call('session.list', []))
+
+    data += "[TeamServer: %s:%s" % (environ.get('MSFRPC_HOST'),
+                                    environ.get('MSFRPC_PORT'))
+
+    if str(environ.get("MSFRPC_SSL")) == "true":
+           data += " (SSL)"
+
+    data += " - J:%s S:%s]" % (str(jobs), str(sessions))
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

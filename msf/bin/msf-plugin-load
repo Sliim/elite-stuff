@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+
+if len(sys.argv) < 2:
+    print 'Which plugin? some args?'
+    exit(1)
+
+client = rpcutils.login()
+opts = {}
+
+if len(sys.argv) == 3:
+    # FIXME: plugins with opts fails to load
+    for arg in sys.argv[2].split(","):
+        k, v = arg.split("=")
+        opts[k] = v
+
+print "Loading plugin %s.. %s" % (
+    sys.argv[1],
+    client.call("plugin.load", [sys.argv[1], opts])["result"])

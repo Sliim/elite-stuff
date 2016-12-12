@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+data = ""
+
+def collect_data():
+    def append(d, extra=True):
+        global data
+        if not extra or (extra and not args.list):
+            data += d
+
+    sessions = client.call('session.list', [])
+
+    total = 0
+    append("msf> Active sessions:\n----------\n")
+    for s in sessions:
+        total += 1
+        append("%d - %s: %s <=> %s - %s (%s) %s\n" % (s, sessions[s].get("desc"),
+                                                    sessions[s].get('tunnel_local'),
+                                                    sessions[s].get('tunnel_peer'),
+                                                    sessions[s].get("via_exploit"),
+                                                    sessions[s].get("via_payload"),
+                                                    sessions[s].get('info')), False)
+        if sessions[s].get('routes'):
+            append("  > Routes:\n")
+            for r in sessions[s].get('routes').split(","):
+                append("\t- %s\n" % r)
+    append("----------\nTotal: %d" % total)
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+ws_list = client.call("db.workspaces", [])["workspaces"]
+current_ws = client.call("db.current_workspace")["workspace"] if args.current else None
+
+def collect_data():
+    total = 0
+    data = "msf> Last events:\n----------"
+    for ws in ws_list:
+        if current_ws and current_ws != ws["name"]: continue
+        if args.workspace and args.workspace != ws["name"]: continue
+        events = client.call('db.events', [{"workspace": ws["name"], "limit": 100}])
+        if not rpcutils.check_resp(events): continue
+        if len(events["events"]) > 0:
+            data += "\n[*] %s workspace:\n" % ws["name"].capitalize()
+        for e in events["events"]:
+            total += 1
+            criticity = "normal"
+            if "critical" in e and e["critical"]:
+                criticity = "critical"
+            data += "%s>%s | [%s@%s][%s] %s - %s\n" % (
+                e.get("created_at"),
+                e.get("updated_at"),
+                e.get("username"),
+                e.get("host"),
+                criticity,
+                e.get("name"),
+                e.get("info"))
+    data += "----------\nTotal: %d" % total
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

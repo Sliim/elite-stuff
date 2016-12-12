@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+
+if len(sys.argv) != 2:
+    print 'Give me a file to import man!'
+    exit(1)
+
+current_ws = client.call('db.current_workspace')['workspace']
+content = open(sys.argv[1], 'r').read()
+print client.call('db.import_data', [{'workspace': current_ws, 'data': content}]).get("result")

@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+ws_list = client.call("db.workspaces", [])["workspaces"]
+current_ws = client.call("db.current_workspace")["workspace"] if args.current else None
+data = ""
+
+def collect_data():
+    def append(d, extra=True):
+        global data
+        if not extra or (extra and not args.list):
+            data += d
+
+    total = 0
+    append("msf> Vulns:\n----------")
+    for ws in ws_list:
+        if current_ws and current_ws != ws["name"]: continue
+        if args.workspace and args.workspace != ws["name"]: continue
+
+        opts = {"workspace": ws["name"], "limit": 13337}
+        if args.item:
+            opts["addresses"] = args.item
+
+        vulns = client.call('db.vulns', [opts])
+        if not rpcutils.check_resp(vulns): continue
+        if len(vulns["vulns"]) > 0:
+            append("\n[*] %s workspace:\n" % ws["name"].capitalize())
+        for v in vulns.get("vulns"):
+            total += 1
+            port_info = ""
+            if v.get("port"): port_info = " %s/%s - " % (v.get("proto"), v.get("port"))
+            append("%s -%s %s |refs: %s\n" % (v.get("host"),
+                                        port_info,
+                                        v.get("name"),
+                                        v.get("refs")), False)
+    append("----------\nTotal: %d" % total)
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

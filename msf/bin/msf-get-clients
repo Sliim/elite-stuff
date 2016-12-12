@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+ws_list = client.call("db.workspaces", [])["workspaces"]
+current_ws = client.call("db.current_workspace")["workspace"] if args.current else None
+data = ""
+
+def collect_data():
+    def append(d, extra=True):
+        global data
+        if not extra or (extra and not args.list):
+            data += d
+
+    total = 0
+    append("msf> Active clients:\n----------\n")
+    for ws in ws_list:
+        if current_ws and current_ws != ws["name"]: continue
+        if args.workspace and args.workspace != ws["name"]: continue
+        clients = client.call('db.clients', [{"workspace": ws["name"]}])
+        if not rpcutils.check_resp(clients): continue
+        if len(clients["clients"]) > 0:
+            append("\n[*] %s workspace:\n" % ws["name"].capitalize())
+        for c in clients["clients"]:
+            total += 1
+            append("%s>%s | [%s][%s][%s][%s]\n" % (
+                c.get("created_at"),
+                c.get("updated_at"),
+                c.get("ua_name"),
+                c.get("ua_ver"),
+                c.get("ua_string"),
+                e.get("host")), False)
+    append("----------\nTotal: %d" % total)
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+
+def collect_data():
+    plugins = client.call('plugin.loaded', []).get("plugins")
+    data = "msf> Loaded plugins:\n----------\n"
+    for p in plugins:
+        data += "%s\n" % p
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+data = ""
+
+def collect_data():
+    def append(d, extra=True):
+        global data
+        if not extra or (extra and not args.list):
+            data += d
+
+    consoles = client.call("console.list").get("consoles")
+    total = 0
+    append("msf> Active consoles:\n----------\n")
+    for c in consoles:
+        total += 1
+        append("%s - %s (Busy: %s)\n" % (c.get("id"),
+                                       c.get("prompt"),
+                                       str(c.get("busy"))), False)
+
+    append("----------\nTotal: %d" % total)
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

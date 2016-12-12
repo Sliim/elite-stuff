@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import time
+import rpcutils
+import cmd
+import sys
+from threading import Timer
+
+class MsfShell(cmd.Cmd):
+    def __init__(self, sid):
+        self.locked = False
+        self.client = rpcutils.login()
+        self.sid = sid
+        self.prompt = "#%s Shell> " % self.sid
+        self.set_timer()
+        cmd.Cmd.__init__(self)
+
+    def set_timer(self):
+        self.refresh_timer = Timer(10.0, self.refresh)
+        self.refresh_timer.start()
+
+    def wait_lock(self):
+        while True:
+            if not self.locked:
+                break
+            time.sleep(2)
+
+    def lock(self):
+        self.locked = True
+
+    def unlock(self):
+        self.locked = False
+
+    def refresh(self):
+        self.wait_lock()
+        self.lock()
+        try:
+            res = self.read_data()
+            if res.get("data") and len(res.get("data")) > 0:
+                print res.get("data")
+                sys.stdout.write(self.prompt)
+                sys.stdout.flush()
+        except Exception as e:
+            print e.message
+        finally:
+            self.unlock()
+            self.set_timer()
+
+    def read_data(self):
+        return self.client.call("session.shell_read", [self.sid])
+
+    def onecmd(self, cmd):
+        self.wait_lock()
+        self.lock()
+
+        if cmd in ["exit", "EOF"]: self.do_exit(cmd); return True
+        self.client.call("session.shell_write", [self.sid, "%s\n" % cmd])
+        time.sleep(1)
+        print self.read_data().get("data")
+        self.unlock()
+
+    def do_help(self):
+        self.onecmd("help")
+
+    def do_exit(self, s):
+        self.refresh_timer.cancel()
+        return True
+    do_EOF = do_exit
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print "Which session?"
+        exit(1)
+    if len(sys.argv) == 3:
+        MsfShell(sys.argv[1]).onecmd(sys.argv[2])
+    else:
+        MsfShell(sys.argv[1]).cmdloop()

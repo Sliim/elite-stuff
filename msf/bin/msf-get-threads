@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+data = ""
+
+def collect_data():
+    def append(d, extra=True):
+        global data
+        if not extra or (extra and not args.list):
+            data += d
+
+    threads = client.call('core.thread_list', [])
+    total = 0
+    append("msf> Active threads:\n----------\n")
+    for tid in threads:
+        total += 1
+        critical = "normal"
+        if threads[tid]["critical"]:
+            critical = "critical"
+        append("%d - %s %s %s %s\n" % (
+            tid,
+            threads[tid].get("started"),
+            critical,
+            threads[tid].get("status"),
+            threads[tid].get("name")), False)
+    append("----------\nTotal: %d" % total)
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

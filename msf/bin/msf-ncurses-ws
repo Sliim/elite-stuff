@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import os
+import sys
+import time
+import curses
+import subprocess
+import rpcutils
+
+client = rpcutils.login()
+if not client:
+    exit(1)
+
+def main():
+    w = curses.initscr()
+    try:
+        while True:
+            try:
+                w.erase()
+                w.addstr("Collecting data..")
+                data = collect_data()
+                w.erase()
+                w.addstr(data)
+                time.sleep(3)
+            except Exception:
+                pass
+            w.refresh()
+    finally:
+        curses.endwin()
+
+def generate_panel(current_ws, hosts, loots, creds, services, vulns, notes, events, clients):
+    panel = """=====================================
+Workspace status:
+================
+> Current: %s
+> Hosts: %s\t|\tNotes: %s
+> Services: %s\t|\tVulns: %s
+> Loots: %s\t|\tCreds: %s
+> Events: %s\t|\tClients: %s
+""" % (
+    current_ws,
+    len(hosts) if hosts else 0, len(notes) if notes else 0,
+    len(services) if services else 0, len(vulns) if vulns else 0,
+    len(loots) if loots else 0, len(creds) if creds else 0,
+    len(events) if events else 0, len(clients) if clients else 0
+)
+
+    panel += "\n=====================================\nHosts:===== \n"
+    for h in hosts:
+        host_services = client.call('db.services', [{'workspace': current_ws, "address": h.get("address")}]).get("services")
+        host_vulns = client.call('db.vulns', [{'workspace': current_ws, "address": h.get("address")}]).get("vulns")
+        panel += "* %s (%s %s)\n" % (h.get('address'), h.get('os_name'), h.get('purpose'))
+        panel += "> MAC: %s\n" % h.get('mac')
+        panel += "> Status: %s\n" % h.get('state')
+        panel += "> Infos: %s\n" % h.get('info')
+        panel += "> Total services: %d\n" % (len(host_services) if host_services else 0)
+        panel += "> Total vulns: %d\n" % (len(host_vulns) if host_vulns else 0)
+
+        if len(services) > 0:
+            panel += "> Services:\n----------\n"
+            for s in services:
+                name = s.get("name")
+                if not name:
+                    name = "???"
+                panel += "\t* %s %s (%s)\n" % (s.get("state"), s.get("port"), name)
+        if len(vulns) > 0:
+            panel += "> Vulns:\n-------\n"
+            for v in vulns:
+                panel += "\t* :%s (%s) - %s | %s\n" % (v.get("port"), v.get("proto"), v.get("name"), v.get("refs"))
+
+    panel += "\n=====================================\n"
+    panel += "Loots:\n=====\n"
+    for l in loots:
+        service = "unknown"
+        if "service" in l:
+            service = l.get("service")
+        panel += "* %s (%s) %s - %s (%s)\n" % (l.get("host"), service, l.get("ltype"), l.get("name"), l.get("ctype"))
+
+    panel += "\n=====================================\n"
+    panel += "Creds:\n=====\n"
+    for c in creds:
+        panel += "* %s:%s (%s)\n\t%s:%s\n" % (c.get("host"), c.get("port"), c.get("sname"), c.get("user"), c.get("pass"))
+
+    return panel
+
+def collect_data():
+    current_ws = client.call('db.current_workspace', []).get('workspace')
+    hosts = client.call('db.hosts', [{'workspace': current_ws, "limit": 1337}])
+    loots = client.call('db.loots', [{"workspace": current_ws, "limit": 1337}]).get("loots")
+    creds = client.call('db.creds', [{"workspace": current_ws, "limit": 1337}]).get("creds")
+    services = client.call('db.services', [{"workspace": current_ws, "limit": 1337}]).get("services")
+    vulns = client.call('db.vulns', [{"workspace": current_ws, "limit": 1337}]).get("vulns")
+    notes = client.call('db.notes', [{"workspace": current_ws, "limit": 1337}]).get("notes")
+    events = client.call('db.events', [{"workspace": current_ws, "limit": 1337}]).get("events")
+    clients = client.call('db.clients', [{"workspace": current_ws, "limit": 1337}]).get("clients")
+    return generate_panel(current_ws, hosts.get("hosts"), loots, creds, services, vulns, notes, events, clients)
+
+main()

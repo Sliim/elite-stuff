@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import os
+import sys
+import time
+import curses
+import subprocess
+import rpcutils
+
+client = rpcutils.login()
+if not client:
+    exit(1)
+
+def main():
+    w = curses.initscr()
+    try:
+        while True:
+            try:
+                w.erase()
+                w.addstr("Collecting data..")
+                data = collect_data()
+                w.erase()
+                w.addstr(data)
+                time.sleep(5)
+            except Exception:
+                pass
+            w.refresh()
+    finally:
+        curses.endwin()
+
+def generate_panel(ram, version, db_status, ws_list, consoles, clients, events, tokens, threads, sessions, loots, jobs, creds, plugins):
+    panel = """=====================================
+System infos:
+============
+Free memory: %sMB
+
+=====================================
+Versions:
+========
+Ruby: %s
+MSF: %s
+API: %s
+
+=====================================
+DB status:
+=========
+> Connected to %s (%s)
+> Workspaces: %s\t|\tConsoles: %s
+> Clients: %s\t|\tEvents: %s
+> Sessions: %s\t|\tJobs: %s
+> Loots: %s\t|\tCreds: %s
+> Tokens: %s\t|\tThreads: %s
+> Plugins: %s
+""" % (
+    str(ram), version.get("ruby"), version.get("version"), version.get("api"),
+    db_status.get("db"), db_status.get("driver"),
+    len(ws_list) if ws_list else 0, len(consoles) if consoles else 0,
+    len(clients) if clients else 0, len(events) if events else 0,
+    len(sessions) if sessions else 0, len(jobs) if jobs else 0,
+    len(loots) if loots else 0, len(creds) if creds else 0,
+    len(tokens) if tokens else 0, len(threads) if threads else 0,
+    len(plugins) if plugins else 0
+)
+
+    panel += "\n=====================================\n"
+    panel += "Loaded plugins:\n==============\n"
+    if plugins:
+        for p in plugins:
+            panel += "* %s\n" % p
+
+    panel += "\n=====================================\n"
+    panel += "Workspaces:\n==========\n"
+    if ws_list:
+        for w in ws_list:
+            panel += "* %s - %s\n" % (w.get("id"), w.get("name"))
+
+    panel += "\n=====================================\n"
+    panel += "Active consoles:\n===============\n"
+    if consoles:
+        for c in consoles:
+            busy = ""
+            if c.get("busy"):
+                busy = "(busy)"
+            panel += "* %s %s %s\n" % (c.get("prompt").replace("\x01\x02", ""), c.get("id"), busy)
+            
+    panel += "\n=====================================\n"
+    panel += "Active sessions:\n===============\n"
+    if sessions:
+        for sid in sessions:
+            panel += "* %d - %s @ %s:%s\n  > %s\n  > %s\n" % (sid, sessions[sid].get("desc"), sessions[sid].get("session_host"), sessions[sid].get("session_port"), sessions[sid].get("via_exploit"), sessions[sid].get("via_payload"))
+
+    panel += "\n=====================================\n"
+    panel += "Background jobs:\n===============\n"
+    if jobs:
+        for j in jobs:
+            jinfo = client.call('job.info', [j])
+            panel += "* %s - %s\n" % (jinfo.get("jid"), jinfo.get("name"))
+    
+    panel += "\n=====================================\n"
+    panel += "Threads:\n===============\n"
+    if threads:
+        for tid in threads:
+            c = ""
+            if threads[tid].get("critical"):
+                c = "(critical)"
+            panel += "* %d> %s [%s] %s\n" % (tid, threads[tid].get("name"), threads[tid].get("status"), c)
+
+    return panel
+
+def collect_data():
+    current_ws = client.call('db.current_workspace', []).get('workspace')
+    db_status = client.call('db.status', [])
+
+    s = subprocess.check_output(["free", "-m"])
+    lines = s.split("\n")
+    ram = int(lines[2].split()[3])
+    
+    ws_list = client.call('db.workspaces', []).get("workspaces")
+    consoles = client.call('console.list', []).get('consoles')
+    jobs = client.call('job.list', [])
+    sessions = client.call('session.list', [])
+    tokens = client.call('auth.token_list', []).get("tokens")
+    version = client.call('core.version', [])
+    stats = client.call('core.module_stats', [])
+    threads = client.call('core.thread_list', [])
+    plugins = client.call('plugin.loaded', []).get("plugins")
+
+    loots = list() 
+    creds = list()
+    clients = list()
+    events = list()
+    
+    for w in ws_list:
+        loots = loots + client.call('db.loots', [{"workspace": w.get("name"), "limit": 1337}]).get("loots")
+        creds = creds + client.call('db.creds', [{"workspace": w.get("name"), "limit": 1337}]).get("creds")
+        clients = clients + client.call('db.clients', [{"workspace": w.get("name"), "limit": 1337}]).get("clients")
+        events = events + client.call('db.events', [{"workspace": w.get("name"), "limit": 1337}]).get("events")
+
+    return generate_panel(ram, version, db_status, ws_list, consoles, clients, events, tokens, threads, sessions, loots, jobs, creds, plugins)
+
+main()

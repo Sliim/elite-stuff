@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+
+if not args.item:
+    print 'Which session?'
+    exit(1)
+
+modules = client.call('session.compatible_modules', [args.item]).get("modules")
+rpcutils.check_resp(modules)
+
+if not args.list: print "msf> Available post modules for sessions #%s\n----------" % args.item
+for m in modules:
+    print m

@@ -1,0 +1,6 @@
+version: "2"
+services:
+  proxy:
+    image: owasp/zap2docker-weekly
+    user: zap
+    command: zap.sh -daemon -port 8090 -host 0.0.0.0 -config api.disablekey=true -config view.mode=attack

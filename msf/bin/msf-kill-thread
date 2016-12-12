@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+
+if len(sys.argv) != 2:
+    print 'Which thread?'
+    exit(1)
+    
+print "Killing thread ID %s.. %s" % (sys.argv[1], client.call("core.thread_kill",
+                                                              [sys.argv[1]])["result"])

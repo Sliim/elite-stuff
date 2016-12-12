@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+ws_list = client.call("db.workspaces", [])["workspaces"]
+current_ws = client.call("db.current_workspace")["workspace"] if args.current else None
+
+def collect_data():
+    data = ""
+    for ws in ws_list:
+        if current_ws and current_ws != ws["name"]: continue
+        if args.workspace and args.workspace != ws["name"]: continue
+        hosts = client.call('db.hosts', [{'workspace': ws["name"]}])
+        services = client.call('db.services', [{"workspace": ws["name"]}])
+        if not rpcutils.check_resp(hosts): continue
+        if not rpcutils.check_resp(services): continue
+
+        for h in hosts.get("hosts"):
+            for s in services.get("services"):
+                if s.get("host") != h.get("address"): continue
+                name = s.get("name")
+                if not name:
+                    name = "???"
+                data += "%s:%s %s/%s (%s) %s - %s %s %s %s %s\n" % (h.get('address'), s.get("port"), s.get("proto"), name, s.get('state'), s.get("info"), h.get('os_name'), h.get("name"), h.get('os_purpose'), h.get('os_flavor'), h.get('info'))
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()

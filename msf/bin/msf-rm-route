@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+#
+# Usage:
+#  - msf-add-route 10.13.37.0/24 42
+#
+
+from os import sys, path
+import time
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+
+if len(sys.argv) != 4:
+    print 'What?!'
+    exit(1)
+
+cmds = []
+cid = client.call("console.create", [{}])["id"]
+client.call("console.read", [cid])
+cmds.append("route remove %s %s %s" % (sys.argv[1], sys.argv[2], sys.argv[3]))
+cmds.append("")
+
+client.call("console.write", [cid, "\r\n".join(cmds)])
+while True:
+    time.sleep(2)
+    r = client.call("console.read", [cid])
+    if r.get("data"):
+        print r.get("data")
+    if not r.get("busy"):
+        break
+
+client.call("console.destroy", [cid])

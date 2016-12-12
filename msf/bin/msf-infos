@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from os import sys, path, environ
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+import rpcutils
+client = rpcutils.login()
+args = rpcutils.parse_args()
+
+def collect_data():
+    data = ""
+    jobs = len(client.call('job.list', []))
+    sessions = len(client.call('session.list', []))
+    versions = client.call('core.version', [])
+
+    data += "Framework: %s\t\tServer: %s:%s (SSL: %s)\n" % (versions['version'],
+                                                            environ.get('MSFRPC_HOST'),
+                                                            environ.get('MSFRPC_PORT'),
+                                                            str(environ.get('MSFRPC_SSL')))
+
+    data += "API:       %s\n\n" % versions['api']
+    data += "Jobs: %s - Sessions: %s" % (str(jobs), str(sessions))
+    return data
+
+if args.follow:
+    rpcutils.ncurses(collect_data)
+else:
+    print collect_data()
