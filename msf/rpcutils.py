@@ -1,7 +1,14 @@
+# -*- coding:utf-8 -*-
+
 import os
 import msfrpc
 import argparse
 import curses
+import time
+import cmd
+import sys
+from threading import Timer
+
 
 def login():
     try:
@@ -17,12 +24,14 @@ def login():
         return False
     return client
 
+
 def check_resp(resp):
     if "error" in resp:
         print "ERROR! %s: %s" % (resp["error_class"],
                                  resp["error_message"])
         return False
     return True
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='MSF RPC Stuff!')
@@ -32,6 +41,7 @@ def parse_args():
     parser.add_argument('-f','--follow', help='Start a ncurses interface', required=False, action="store_true")
     parser.add_argument('-l','--list', help='Listing output (no extra line)', required=False, action="store_true")
     return parser.parse_args()
+
 
 def ncurses(collector):
     w = curses.initscr()
@@ -46,3 +56,56 @@ def ncurses(collector):
             w.refresh()
     finally:
         curses.endwin()
+
+
+class MsfCmd(cmd.Cmd):
+    def __init__(self):
+        self.locked = False
+        self.client = rpcutils.login()
+        self.set_timer()
+        cmd.Cmd.__init__(self)
+
+    def read_data(self):
+        return None
+
+    def set_timer(self):
+        self.refresh_timer = Timer(10.0, self.refresh)
+        self.refresh_timer.start()
+
+    def wait_lock(self):
+        while True:
+            if not self.locked:
+                break
+            time.sleep(2)
+
+    def lock(self):
+        self.locked = True
+
+    def unlock(self):
+        self.locked = False
+
+    def refresh(self):
+        self.wait_lock()
+        self.lock()
+        try:
+            res = self.read_data()
+            if res.get("data") and len(res.get("data")) > 0:
+                print res.get("data")
+                sys.stdout.write(self.prompt)
+                sys.stdout.flush()
+        except Exception as e:
+            print e.message
+        finally:
+            self.unlock()
+            self.set_timer()
+
+    def onecmd(self, cmd):
+        Return False
+
+    def do_help(self):
+        self.onecmd("help")
+
+    def do_exit(self, s):
+        self.refresh_timer.cancel()
+        return True
+    do_EOF = do_exit
