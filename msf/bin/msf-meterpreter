@@ -4,6 +4,7 @@ from os import sys, path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 import rpcutils
+import time
 
 class MsfMeterpreter(rpcutils.MsfCmd):
     def __init__(self, sid):
@@ -23,7 +24,7 @@ class MsfMeterpreter(rpcutils.MsfCmd):
         self.client.call("session.meterpreter_write", [self.sid, "%s\r\n" % cmd])
         time.sleep(1)
         print self.read_data().get("data")
-        self.unlock()t
+        self.unlock()
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

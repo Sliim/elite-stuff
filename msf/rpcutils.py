@@ -18,9 +18,10 @@ def login():
             "uri": os.environ.get("MSFRPC_URI"),
             "ssl": os.environ.get("MSFRPC_SSL") == "true"
         })
-        client.login(os.environ.get('MSFRPC_USER'), os.environ.get('MSFRPC_PASS'))
+        client.login(os.environ.get('MSFRPC_USER'),
+                     os.environ.get('MSFRPC_PASS'))
     except Exception:
-        print "Cannot connect.. sorry."
+        print 'Cannot connect.. sorry.'
         return False
     return client
 
@@ -35,11 +36,16 @@ def check_resp(resp):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='MSF RPC Stuff!')
-    parser.add_argument('item', help='Item to select in commands', metavar='I', type=str, nargs="?")
-    parser.add_argument('-c','--current', help='Print results only for current workspace', required=False, action="store_true")
-    parser.add_argument('-w','--workspace', help='Print results only for specific workspace', required=False)
-    parser.add_argument('-f','--follow', help='Start a ncurses interface', required=False, action="store_true")
-    parser.add_argument('-l','--list', help='Listing output (no extra line)', required=False, action="store_true")
+    parser.add_argument('item', help='Item to select in commands',
+                        metavar='I', type=str, nargs="?")
+    parser.add_argument('-c', '--current', required=False, action="store_true",
+                        help='Print results only for current workspace')
+    parser.add_argument('-w', '--workspace', required=False,
+                        help='Print results only for specific workspace')
+    parser.add_argument('-f', '--follow', required=False, action="store_true",
+                        help='Start a ncurses interface')
+    parser.add_argument('-l', '--list', required=False, action="store_true",
+                        help='Listing output (no extra line)')
     return parser.parse_args()
 
 
@@ -61,7 +67,7 @@ def ncurses(collector):
 class MsfCmd(cmd.Cmd):
     def __init__(self):
         self.locked = False
-        self.client = rpcutils.login()
+        self.client = login()
         self.set_timer()
         cmd.Cmd.__init__(self)
 
@@ -100,7 +106,7 @@ class MsfCmd(cmd.Cmd):
             self.set_timer()
 
     def onecmd(self, cmd):
-        Return False
+        return False
 
     def do_help(self):
         self.onecmd("help")

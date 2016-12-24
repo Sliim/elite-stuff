@@ -4,6 +4,7 @@ from os import sys, path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 import rpcutils
+import time
 
 class MsfShell(rpcutils.MsfCmd):
     def __init__(self, sid):
