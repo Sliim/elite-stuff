@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# This file is a modified version of:
+# https://raw.githubusercontent.com/rsmudge/armitage/master/dist/unix/teamserver
+#
 # start msfrpcd and the deconfliction server. Check for common mistakes
 # to save some time and head scratching...
 
