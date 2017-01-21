@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <http://www.gnu.org/licenses/>.
 
-# Original sources: TODO: github repo
+# Original sources:
+#     https://github.com/SpiderLabs/msfrpc/blob/master/python-msfrpc/msfrpc.py
 # Changes by @Sliim:
 #  - Fix SSL support
 #  - Pep8
