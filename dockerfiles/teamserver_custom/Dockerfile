@@ -8,11 +8,11 @@ RUN apt-get install -y git-core ant zip
 RUN apt-get clean; apt-get autoclean; apt-get autoremove -y
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN git clone https://github.com/Sliim/armitage /armitage
-WORKDIR /armitage
-RUN sh /armitage/package.sh
+RUN git clone https://github.com/Sliim/armitage /usr/share/armitage
+WORKDIR /usr/share/armitage
+RUN sh package.sh
 
-COPY teamserver /armitage/teamserver
+COPY teamserver /usr/bin/teamserver
 
-ENTRYPOINT ["/armitage/teamserver"]
+ENTRYPOINT ["/usr/bin/teamserver"]
 CMD ["0.0.0.0", "55551", "msf", "teamserver-password", "55553"]

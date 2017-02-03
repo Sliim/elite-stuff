@@ -48,4 +48,4 @@ rm -f ./armitage.store
 keytool -keystore ./armitage.store -storepass 123456 -keypass 123456 -genkey -keyalg RSA -alias armitage -dname "CN=Lab Teamserver, OU=Forbidden, O=, L=Somewhere, S=Cyberspace, C=Earth"
 
 print_info "Starting Armitage team server"
-java -Djavax.net.ssl.keyStore=./armitage.store -Djavax.net.ssl.keyStorePassword=123456 -server -XX:+UseParallelGC -jar /armitage/armitage.jar --server $1 $2 $3 $4 $5 $6
+java -Djavax.net.ssl.keyStore=./armitage.store -Djavax.net.ssl.keyStorePassword=123456 -server -XX:+UseParallelGC -jar /usr/share/armitage/armitage.jar --server $1 $2 $3 $4 $5 $6
