@@ -56,10 +56,11 @@ def ncurses(collector):
             try:
                 w.erase()
                 w.addstr(collector())
-                time.sleep(3)
             except Exception:
                 pass
-            w.refresh()
+            finally:
+                w.refresh()
+                time.sleep(3)
     finally:
         curses.endwin()
 

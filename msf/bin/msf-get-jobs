@@ -9,6 +9,8 @@ args = rpcutils.parse_args()
 data = ""
 
 def collect_data():
+    global data
+    data = ""
     def append(d, extra=True):
         global data
         if not extra or (extra and not args.list):

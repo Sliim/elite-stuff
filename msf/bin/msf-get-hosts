@@ -11,6 +11,8 @@ current_ws = client.call("db.current_workspace")["workspace"] if args.current el
 data = ""
 
 def collect_data():
+    global data
+    data = ""
     def append(d, extra=True):
         global data
         if not extra or (extra and not args.list):

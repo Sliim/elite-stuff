@@ -9,12 +9,14 @@ args = rpcutils.parse_args()
 data = ""
 
 def collect_data():
+    global data
+    data = ""
     def append(d, extra=True):
         global data
         if not extra or (extra and not args.list):
             data += d
 
-    consoles = client.call("console.list").get("consoles")
+    consoles = client.call("console.list", []).get("consoles")
     total = 0
     append("msf> Active consoles:\n----------\n")
     for c in consoles:
