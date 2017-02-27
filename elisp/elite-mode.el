@@ -23,6 +23,7 @@
 (require 'helm-h4x0r)
 (require 'exploitdb)
 (require 'popwin)
+(require 'alert)
 
 (defvar elite-mode-hook nil)
 
@@ -50,6 +51,7 @@
     (define-key map "R" 'elite-mode)
     (define-key map (kbd "o e") 'msf>read-opts)
     (define-key map (kbd "o c") 'msf>clear-opts)
+    (define-key map (kbd "b s") 'elite-save-buffers)
     map)
   "Keymap for Elite major mode")
 
@@ -87,6 +89,7 @@
       (insert "\n Elite Stuff\n")
       (insert "----------\n")
       (insert "x - Search Sploit |  H - H4x0r Stuff\n")
+      (insert "b s - Save All Buffers\n")
       (insert "\n")
       (insert "q - Quit\n")
       (kill-all-local-variables)
@@ -96,10 +99,28 @@
       (run-hooks 'elite-mode-hook))))
 
 (defun elite-teamserver-infos ()
-  "Show TeamServer Infos"
+  "Show TeamServer Infos notification."
   (interactive)
-  (msf>async-shell-command "msf-infos;msf-status"))
+  (alert (concat "Elite mode started\n" (shell-command-to-string "msf-infos;echo;msf-status")) :title "EliteStuff" :category 'pwnage))
 
+(defun elite-update-mode-line ()
+  "Update elite mode-line"
+  (message "Updating mode-line..")
+  (setq-default mode-line-format
+        (list
+         (shell-command-to-string "msf-mode-line")
+         minor-mode-alist))
+  (message "Done."))
+
+(defun elite-save-buffers ()
+  "Save all buffers in elite-mode."
+  (interactive)
+  (dolist (b (buffer-list))
+    (set-buffer b)
+    (if (not (string-match "^ ?\\*" (buffer-name)))
+        (write-file (buffer-name)))))
+
+(run-at-time 0 60 'elite-update-mode-line)
 (push '("*elite-mode*" :stick t :height 35 :position top) popwin:special-display-config)
 
 (provide 'elite-mode)

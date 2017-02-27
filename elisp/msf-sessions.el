@@ -51,13 +51,13 @@
        (dolist (candidate (helm-marked-candidates))
          (let ((cmds '()))
            (add-to-list 'cmds (concat "msf-shell " (msf>get-session-id-from-candidate candidate)))
-           (msf>eshell-console cmds)))))
+           (msf>eshell-console cmds (concat "Shell-" (msf>get-session-id-from-candidate candidate)))))))
     ("Console/Meterpreter" .
      (lambda (_candidate)
        (dolist (candidate (helm-marked-candidates))
          (let ((cmds '()))
            (add-to-list 'cmds (concat "msf-meterpreter " (msf>get-session-id-from-candidate candidate)))
-           (msf>eshell-console cmds)))))
+           (msf>eshell-console cmds (concat "Meterpreter-" (msf>get-session-id-from-candidate candidate)))))))
     ("Upgrade sessions" .
      (lambda (_candidate)
        (dolist (candidate (helm-marked-candidates))
@@ -93,7 +93,7 @@
   (helm-build-in-buffer-source "MSF Sessions"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message "[*] Loading active sessions..")
+              (alert "Loading active sessions.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string "msf-get-sessions -l"))))
     :action msf/sessions-actions)
   "MSF Sessions helm source definition.")
@@ -102,7 +102,7 @@
   (helm-build-in-buffer-source "MSF Post"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message (concat "[*] Searching post modules for session #" msf/current-sessid ".."))
+              (alert (concat "Searching post modules for session #" msf/current-sessid "..") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string (concat "msf-session-get-compatible-modules -l " msf/current-sessid)))))
     :action msf/post-module-actions)
   "MSF session post modules helm source definition.")

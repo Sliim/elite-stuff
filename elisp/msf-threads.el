@@ -61,7 +61,7 @@
   (helm-build-in-buffer-source "MSF Threads"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message "[*] Loading active threads..")
+              (alert "Loading active threads.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string "msf-get-threads -l"))))
     :action msf/threads-actions)
   "MSF Threads helm source definition.")

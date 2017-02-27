@@ -111,17 +111,15 @@
   '(("[MSFConsole][Emacs] Module Infos" .
      (lambda (candidate)
        (let ((m (msf>module-name-from-candidate-file candidate)))
-         (message (concat "[*] Loading " m " module info. "
-                          "This may take a while.."))
+         (alert (concat "[*] Loading " m " module info. This may take a while..") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
          (shell-command (concat (expand-file-name
                                  (concat msf/abs-path "/msfconsole"))
                                 " -q -L -x \"info " m ";quit\""))
-         (message (concat "[*] Module " m " loaded.")))))
+         (alert (concat "[*] Module " m " loaded.") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage))))
     ("[MSFConsole][Eshell] Load with msfconsole" .
      (lambda (candidate)
        (let ((m (msf>module-name-from-candidate-file candidate)))
-         (message (concat "[*] Loading " m " module in msfconsole. "
-                          "This may take a while.."))
+         (alert (concat "[*] Loading " m " module in msfconsole. This may take a while..") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
          (msf>eshell-msfconsole (concat "use " m ";show options;"))))))
   "MSF Modules file actions with msfconsole.")
 
@@ -139,7 +137,7 @@
                    (add-to-list 'cmd (concat "msf-resource " (file-name-nondirectory (concat candidate ".rc"))
                                              " " (msf>render-opts-oneline
                                                   (msf>merge-with-current-opts (msf>read-opts))) ";"))
-                   (msf>eshell-console cmd)))))
+                   (msf>eshell-console cmd (concat "Resource-" candidate))))))
             ("[Tmux] Launch resources" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -248,7 +246,7 @@
 (defun msf>get-files (directory maxdepth)
   "List msf ruby files in given DIRECTORY.
 Recurse only to depth MAXDEPTH.  If zero or negative, then do not recurse."
-  (message (concat "[*] Searching MSF files in " directory ".."))
+  (message (concat "Searching MSF files in " directory ".."))
   (let* ((msf-files '())
          (current-directory-list
           (directory-files directory t)))
@@ -277,11 +275,25 @@ Recurse only to depth MAXDEPTH.  If zero or negative, then do not recurse."
 (defun msf>eshell-msfconsole (command)
   "Run msfconsole inside eshell and execute given COMMAND."
   (let ((command (concat msf/console " -x \"" command "\"")))
-    (msf>eshell-console '(command))))
+    (msf>eshell-console '(command))) "MSFConsole")
 
-(defun msf>eshell-console (cmds)
-  "Run CMD in RPC console with eshell."
-  (eshell 'Z)
+(defun msf>eshell-buffer-name (name)
+  "Return correct buffer NAME."
+  (replace-regexp-in-string "/" "-" name))
+
+(defun msf>eshell-console (cmds &optional buffer-name)
+  "Run CMDS in RPC console with eshell.  Set BUFFER-NAME if specified."
+  (let ((create-new-buffer t))
+    (when buffer-name
+      (when (get-buffer (msf>eshell-buffer-name buffer-name))
+        (setq create-new-buffer nil)
+        (switch-to-buffer (msf>eshell-buffer-name buffer-name))))
+
+    (when create-new-buffer
+      (eshell 'Z)
+      (when buffer-name
+        (rename-buffer (msf>eshell-buffer-name buffer-name)))))
+
   (dolist (cmd cmds)
     (end-of-buffer)
     (eshell-kill-input)

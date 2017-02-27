@@ -6,3 +6,5 @@
 (depends-on "helm")
 (depends-on "emamux")
 (depends-on "popwin")
+(depends-on "alert")
+(depends-on "ascii")

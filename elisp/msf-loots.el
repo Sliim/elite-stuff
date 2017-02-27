@@ -58,7 +58,7 @@
               (let ((cmd "msf-get-loots -l"))
                 (when msf/current-rhost
                   (setf cmd (concat cmd " " msf/current-rhost)))
-                (message "[*] Loading loots..")
+                (alert "Loading loots.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (insert (shell-command-to-string cmd)))))
     :action msf/loots-actions)
   "MSF Loots helm source definition.")

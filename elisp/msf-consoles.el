@@ -51,7 +51,7 @@
        (dolist (candidate (helm-marked-candidates))
          (let ((cmds '()))
            (add-to-list 'cmds (concat "msf-console " (msf>get-console-id-from-candidate candidate)))
-           (msf>eshell-console cmds)))))
+           (msf>eshell-console cmds (concat "Console-" (msf>get-console-id-from-candidate candidate)))))))
     ("Kill console" .
      (lambda (_candidate)
        (dolist (candidate (helm-marked-candidates))
@@ -63,7 +63,7 @@
   (helm-build-in-buffer-source "MSF Consoles"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message "[*] Loading active consoles..")
+              (alert "Loading active consoles.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string "msf-get-consoles -l"))))
     :action msf/consoles-actions)
   "MSF Consoles helm source definition.")

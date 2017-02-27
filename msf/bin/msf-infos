@@ -13,12 +13,11 @@ def collect_data():
     sessions = len(client.call('session.list', []))
     versions = client.call('core.version', [])
 
-    data += "Framework: %s\t\tServer: %s:%s (SSL: %s)\n" % (versions['version'],
-                                                            environ.get('MSFRPC_HOST'),
-                                                            environ.get('MSFRPC_PORT'),
-                                                            str(environ.get('MSFRPC_SSL')))
-
+    data += "Framework: %s\n" % versions['version']
     data += "API:       %s\n\n" % versions['api']
+    data += "Teamserver: %s:%s (SSL: %s)\n" % (environ.get('MSFRPC_HOST'),
+                                            environ.get('MSFRPC_PORT'),
+                                            str(environ.get('MSFRPC_SSL')))
     data += "Jobs: %s - Sessions: %s" % (str(jobs), str(sessions))
     return data
 

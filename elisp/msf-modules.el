@@ -59,7 +59,7 @@
          (let ((cmds '("msf-console")))
            (add-to-list 'cmds (concat "use " candidate) t)
            (add-to-list 'cmds "info" t)
-           (msf>eshell-console cmds)))))
+           (msf>eshell-console cmds (concat "Console-" candidate))))))
     ("Modules Infos [Tmux]" .
      (lambda (_candidate)
        (dolist (candidate (helm-marked-candidates))
@@ -69,51 +69,72 @@
        (kill-new candidate))))
   "MSF Modules actions.")
 
+(defun msf>module-run-async-shell (module options command)
+  "Load MODULE, set OPTIONS and run COMMAND in async shell."
+  (alert (concat "Launch " module " in background with options:\n" (msf>render-opts options))
+         :icon "kali-metasploit"
+         :title "Metasploit - Launching background module!"
+         :category 'pwnage)
+  (msf>async-shell-command (concat "msf-module " module " \"" command "\" \""
+                                   (msf>render-opts-oneline options) "\";")))
+
+(defun msf>module-run-eshell-console (module options command)
+  "Load MODULE, set OPTIONS and run COMMAND in eshell."
+  (alert (concat "Launch " module " in Eshell with options:\n" (msf>render-opts options))
+         :icon "kali-metasploit"
+         :title "Metasploit - Launching module!"
+         :category 'pwnage)
+  (let ((cmd '()))
+    (add-to-list 'cmd (concat "msf-console-module " module " \"" command "\" \""
+                              (msf>render-opts-oneline options) "\";"))
+    (msf>eshell-console cmd module)))
+
+(defun msf>module-run-tmux-window (module options command)
+  "Load MODULE, set OPTIONS and run COMMAND in new Tmux window."
+  (alert (concat "Launch " module " with Tmux! Options:\n" (msf>render-opts options))
+         :icon "kali-metasploit"
+         :title "Metasploit - Launching module!"
+         :category 'pwnage)
+  (msf>tmux-run (concat "msf-module " module " \"" command "\" \""
+                        (msf>render-opts-oneline options) "\";")))
+
 (defvar msf/auxiliary-module-actions
-  (append '(("Launch module" .
+  (append '(("Launch module with defined options" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>async-shell-command (concat "msf-module " candidate " \"run -j\" \""
-                                                  (msf>render-opts-oneline
-                                                   (msf>merge-with-current-opts (msf>read-opts))) "\";")))))
+                 (msf>module-run-async-shell candidate (msf>get-current-opts) "run -j"))))
+            ("Launch modules and set options" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
             ("Launch modules in new console" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (let ((cmd '()))
-                   (add-to-list 'cmd (concat "msf-console-module " candidate " \"run -j\" \""
-                                             (msf>render-opts-oneline
-                                              (msf>merge-with-current-opts (msf>read-opts))) "\";"))
-                   (msf>eshell-console cmd)))))
+                 (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
             ("Launch modules in new Tmux window" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>tmux-run (concat "msf-module " candidate " \"run -j\" \""
-                                       (msf>render-opts-oneline
-                                        (msf>merge-with-current-opts (msf>read-opts))) "\";"))))))
+                 (msf>module-run-tmux-window candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j")))))
           msf/module-actions)
   "MSF Auxiliary module actions.")
 
 (defvar msf/exploits-module-actions
-  (append '(("Launch module" .
+  (append '(("Launch module with defined options" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>async-shell-command (concat "msf-module " candidate " \"exploit -j -z\" \""
-                                                  (msf>render-opts-oneline
-                                                   (msf>merge-with-current-opts (msf>read-opts))) "\";")))))
+                 (msf>module-run-async-shell candidate (msf>get-current-opts) "exploit -j -z"))))
+            ("Launch modules and set options" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "exploit -j -z"))))
             ("Launch modules in new console" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (let ((cmd '()))
-                   (add-to-list 'cmd (concat "msf-console-module " candidate " \"exploit -j -z\" \""
-                                             (msf>render-opts-oneline
-                                              (msf>merge-with-current-opts (msf>read-opts))) "\";"))
-                   (msf>eshell-console cmd)))))
+                 (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "exploit -j -z"))))
             ("Launch modules in new Tmux window" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>tmux-run (concat "msf-module " candidate " \"exploit -j -z\" \""
-                                       (msf>render-opts-oneline
-                                        (msf>merge-with-current-opts (msf>read-opts))) "\";"))))))
+                 (msf>module-run-tmux-window candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "exploit -j -z")))))
           msf/module-actions)
   "MSF Exploits module actions.")
 
@@ -121,23 +142,15 @@
   (append '(("Launch module" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>async-shell-command (concat "msf-module " candidate " \"exploit -j -z\" \""
-                                                  (msf>render-opts-oneline
-                                                   (msf>merge-with-current-opts (msf>read-opts))) "\";")))))
+                 (msf>module-run-async-shell candidate (msf>get-current-opts) "run -j"))))
             ("Launch modules in new console" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (let ((cmd '()))
-                   (add-to-list 'cmd (concat "msf-module " candidate " \"exploit -j -z\" \""
-                                             (msf>render-opts-oneline
-                                              (msf>merge-with-current-opts (msf>read-opts))) "\";"))
-                   (msf>eshell-console cmd)))))
+                 (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
             ("Launch modules in new Tmux window" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>tmux-run (concat "msf-module " candidate " \"exploit -j -z\" \""
-                                       (msf>render-opts-oneline
-                                        (msf>merge-with-current-opts (msf>read-opts))) "\";"))))))
+                 (msf>module-run-tmux-window candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j")))))
           msf/module-actions)
   "MSF Post module actions.")
 
@@ -152,7 +165,7 @@
                (dolist (candidate (helm-marked-candidates))
                  (msf>async-shell-command (concat "msf-handler " candidate " \""
                                                   (msf>render-opts-oneline
-                                                   (msf>merge-with-current-opts (msf>read-opts))) "\";"))))))
+                                                   (msf>merge-with-current-opts (msf>read-module-opts candidate))) "\";"))))))
           msf/module-actions)
   "MSF Payloads modules actions.")
 
@@ -161,7 +174,7 @@
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
               (when (not msf/exploits-modules)
-                (message "[*] Loading exploits modules..")
+                (alert "Loading exploits modules.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (setq msf/exploits-modules (shell-command-to-string "msf-get-modules -l exploits")))
               (insert msf/exploits-modules)))
     :action msf/auxiliary-module-actions)
@@ -171,7 +184,7 @@
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
               (when (not msf/auxiliary-modules)
-                (message "[*] Loading auxiliary modules..")
+                (alert "Loading auxiliary modules.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (setq msf/auxiliary-modules (shell-command-to-string "msf-get-modules -l auxiliary")))
               (insert msf/auxiliary-modules)))
     :action msf/auxiliary-module-actions)
@@ -181,7 +194,7 @@
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
               (when (not msf/payloads-modules)
-                (message "[*] Loading payloads modules..")
+                (alert "Loading payloads modules.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (setq msf/payloads-modules (shell-command-to-string "msf-get-modules -l payloads")))
               (insert msf/payloads-modules)))
     :action msf/payload-module-actions)
@@ -191,7 +204,7 @@
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
               (when (not msf/post-modules)
-                (message "[*] Loading post modules..")
+                (alert "Loading post modules.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (setq msf/post-modules (shell-command-to-string "msf-get-modules -l post")))
               (insert msf/post-modules)))
     :action msf/module-actions)
@@ -201,7 +214,7 @@
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
               (when (not msf/encoders-modules)
-                (message "[*] Loading encoders modules..")
+                (alert "Loading encoders modules.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (setq msf/encoders-modules (shell-command-to-string "msf-get-modules -l encoders")))
               (insert msf/encoders-modules)))
     :action msf/post-module-actions)
@@ -211,7 +224,7 @@
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
               (when (not msf/nops-modules)
-                (message "[*] Loading nops modules..")
+                (alert "Loading nops modules.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (setq msf/nops-modules (shell-command-to-string "msf-get-modules -l nops")))
               (insert msf/nops-modules)))
     :action msf/module-actions)

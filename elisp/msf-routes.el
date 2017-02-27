@@ -51,7 +51,7 @@
        (let ((cmd (concat "msf-add-route "
                           (read-string "Destination: ")
                           " " (read-string "Gateway: "))))
-         (message "[*] Adding route..")
+         (alert (concat "Adding route " (msf>get-route-dest-from-candidate candidate)) :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
          (msf>shell-command cmd))))
     ("Remove routes" .
      (lambda (_candidate)
@@ -59,7 +59,7 @@
          (let ((cmd (concat "msf-rm-route "
                             (msf>get-route-dest-from-candidate candidate) " "
                             (msf>get-route-gateway-from-candidate candidate))))
-           (message "[*] Removing route..")
+           (alert (concat "Removing route " (msf>get-route-dest-from-candidate candidate)) :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
            (msf>shell-command cmd))))))
   "MSF Routes actions.")
 
@@ -67,7 +67,7 @@
   (helm-build-in-buffer-source "MSF Routes"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message "[*] Loading active routes..")
+              (alert "Loading active routes.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string "msf-get-routes -l"))))
     :action msf/routes-actions)
   "MSF Routes helm source definition.")

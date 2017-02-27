@@ -53,7 +53,7 @@
          (let ((cmds '("msf-console"))
                (opts (read-string "Nmap options>> ")))
            (add-to-list 'cmds (concat "db_nmap " opts " " (msf>get-host-from-candidate candidate)) t)
-           (msf>eshell-console cmds)))))
+           (msf>eshell-console cmds (concat "db_nmap-" (msf>get-host-from-candidate candidate)))))))
     ("Run Nmap scan in new Tmux window" .
      (lambda (_candidate)
        (dolist (candidate (helm-marked-candidates))
@@ -78,7 +78,7 @@
        (dolist (candidate (helm-marked-candidates))
          (let ((bufname (concat "Report-Host-" (msf>get-host-from-candidate candidate) ".org"))
                (host (msf>get-host-from-candidate candidate)))
-           (message (concat "Generating report for " host ".."))
+           (alert (concat "Generating report for " host "..") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
            (get-buffer-create bufname)
            (switch-to-buffer-other-window bufname)
            (with-current-buffer bufname
@@ -106,7 +106,7 @@
   (helm-build-in-buffer-source "MSF Hosts"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message "[*] Loading active hosts..")
+              (alert "Loading active hosts.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string "msf-get-hosts -c -l"))))
     :action msf/hosts-actions)
   "MSF Hosts helm source definition.")

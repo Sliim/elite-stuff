@@ -68,7 +68,7 @@
               (let ((cmd "msf-get-vulns -l"))
                 (when msf/current-rhost
                   (setf cmd (concat cmd " " msf/current-rhost)))
-                (message "[*] Loading vulns..")
+                (alert "Loading vulns.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (insert (shell-command-to-string cmd)))))
     :action msf/vulns-actions)
   "MSF Vulns helm source definition.")

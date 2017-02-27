@@ -28,21 +28,27 @@
                                                    (number-to-string emacs-minor-version) "/elpa"))))
   (normal-top-level-add-subdirs-to-load-path))
 
-(setq-default mode-line-format
-              (list
-               (shell-command-to-string "msf-mode-line")
-               minor-mode-alist))
-
 (require 'org-msf)
 (require 'elite-mode)
+(require 'elite-hash)
 
-(setq async-shell-command-buffer 'new-buffer)
+(setq gdb-many-windows t)
+
+(setq alert-default-style 'libnotify
+      alert-log-messages t
+      alert-default-icon "kali-cewl")
 
 (push '("*Shell Command Output*") popwin:special-display-config)
-(push '("*Async Shell Command*"  :stick t ) popwin:special-display-config)
-;(push '("*EShell Command Output*") popwin:special-display-config)
+(add-to-list 'display-buffer-alist (cons "\\*Async Shell Command\\*.*" (cons #'display-buffer-no-window nil)))
+(setq async-shell-command-buffer 'new-buffer)
+;;(push '("*Async Shell Command*"  :stick t ) popwin:special-display-config)
+;;(push '("*EShell Command Output*") popwin:special-display-config)
 
-(global-set-key (kbd "C-c e") 'elite-mode)
+(global-set-key (kbd "C-c e m") 'elite-mode)
+(global-set-key (kbd "C-c e a") 'ascii-on)
+(global-set-key (kbd "C-c e b e") 'base64-encode-region)
+(global-set-key (kbd "C-c e b d") 'base64-decode-region)
+
 (global-set-key (kbd "C-c m f") 'helm-msf-files)
 (global-set-key (kbd "C-c m h") 'helm-msf-hosts)
 (global-set-key (kbd "C-c m s") 'helm-msf-services)
@@ -60,6 +66,9 @@
 
 (global-set-key (kbd "C-c s") 'helm-searchsploit)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
+(global-set-key (kbd "C-x s") 'elite-save-buffers)
 
 (msf>eshell-console '("msf-console"))
 (elite-mode)
+(elite-teamserver-infos)
+(elite-update-mode-line)

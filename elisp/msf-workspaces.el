@@ -55,7 +55,7 @@
        (dolist (candidate (helm-marked-candidates))
          (let ((bufname (concat "Report-Workspace-" (replace-regexp-in-string "*" "" candidate) ".org"))
                (workspace (replace-regexp-in-string "*" "" candidate)))
-           (message (concat "Generating report for " workspace " workspace.."))
+           (alert (concat "Generating report for " workspace " workspace..") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
            (get-buffer-create bufname)
            (switch-to-buffer-other-window bufname)
            (with-current-buffer bufname
@@ -77,7 +77,7 @@
   (helm-build-in-buffer-source "MSF Workspaces"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message "[*] Loading workspaces list..")
+              (alert "Loading workspaces list.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string "msf-get-workspaces -l"))))
     :action msf/workspaces-actions)
   "MSF Workspaces helm source definition.")

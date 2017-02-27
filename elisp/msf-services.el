@@ -78,7 +78,7 @@
   (helm-build-in-buffer-source "MSF Services"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message "[*] Loading host's services..")
+              (alert "Loading host's services.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string "msf-get-hosts-services -c"))))
     :action msf/services-actions)
   "MSF Services helm source definition.")
@@ -87,7 +87,7 @@
   (helm-build-in-buffer-source "MSF Auxiliaries"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message (concat "[*] Searching auxiliary modules for " msf/current-sname " service"))
+              (alert (concat "Searching auxiliary modules for " msf/current-sname " service") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string (concat "msf-search-auxiliary " msf/current-sname)))))
     :action msf/auxiliary-module-actions)
   "MSF auxiliary modules helm source definition.")
@@ -95,7 +95,7 @@
   (helm-build-in-buffer-source "MSF Scanners"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message (concat "[*] Searching scanner modules for " msf/current-sname " service"))
+              (alert (concat "Searching scanner modules for " msf/current-sname " service") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string (concat "msf-search-scanners " msf/current-sname)))))
     :action msf/auxiliary-module-actions)
   "MSF scanner modules helm source definition.")
@@ -103,7 +103,7 @@
   (helm-build-in-buffer-source "MSF Exploits"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (message (concat "[*] Searching exploit modules for " msf/current-sname " service, platform: " msf/current-ros))
+              (alert (concat "Searching exploit modules for " msf/current-sname " service, platform: " msf/current-ros) :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
               (insert (shell-command-to-string (concat "msf-search-exploits " msf/current-sname " " msf/current-ros)))))
     :action msf/exploits-module-actions)
   "MSF exploit modules helm source definition.")

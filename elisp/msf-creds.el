@@ -58,7 +58,7 @@
               (let ((cmd "msf-get-creds -l"))
                 (when msf/current-rhost
                   (setf cmd (concat cmd " " msf/current-rhost)))
-                (message "[*] Loading creds..")
+                (alert "Loading creds.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (insert (shell-command-to-string cmd)))))
     :action msf/creds-actions)
   "MSF Creds helm source definition.")

@@ -65,7 +65,7 @@
               (let ((cmd "msf-get-notes -l"))
                 (when msf/current-rhost
                   (setf cmd (concat cmd " " msf/current-rhost)))
-                (message "[*] Loading notes..")
+                (alert "Loading notes.." :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
                 (insert (shell-command-to-string cmd)))))
     :action msf/notes-actions)
   "MSF Notes helm source definition.")

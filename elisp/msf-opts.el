@@ -96,4 +96,16 @@
                   (msf>set-opt k v))))
   msf/user-opts)
 
+(defun msf>read-module-opts (module)
+  "Display MODULE options and read MSF options from user input."
+  (interactive)
+  (alert (concat "Retrieving options for module " module) :icon "kali-metasploit" :title (concat "Metasploit - " module) :category 'pwnage)
+  (let ((bufname (concat "*module-options-" module "*"))
+        (options (concat "Options for " module ":\n\n" (shell-command-to-string (concat "msf-module " candidate " info;")))))
+    (get-buffer-create bufname)
+    (switch-to-buffer bufname)
+    (with-current-buffer bufname
+      (insert options)))
+  (msf>read-opts))
+
 (provide 'msf-opts)
