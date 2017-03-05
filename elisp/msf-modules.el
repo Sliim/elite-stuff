@@ -69,32 +69,27 @@
        (kill-new candidate))))
   "MSF Modules actions.")
 
+(defcustom msf-module-run-function nil
+  "Function to run when launching module.")
+
 (defun msf>module-run-async-shell (module options command)
   "Load MODULE, set OPTIONS and run COMMAND in async shell."
-  (alert (concat "Launch " module " in background with options:\n" (msf>render-opts options))
-         :icon "kali-metasploit"
-         :title "Metasploit - Launching background module!"
-         :category 'pwnage)
+  (funcall msf-module-run-function module options command)
   (msf>async-shell-command (concat "msf-module " module " \"" command "\" \""
                                    (msf>render-opts-oneline options) "\";")))
 
 (defun msf>module-run-eshell-console (module options command)
   "Load MODULE, set OPTIONS and run COMMAND in eshell."
-  (alert (concat "Launch " module " in Eshell with options:\n" (msf>render-opts options))
-         :icon "kali-metasploit"
-         :title "Metasploit - Launching module!"
-         :category 'pwnage)
+  (funcall msf-module-run-function module options command)
   (let ((cmd '()))
     (add-to-list 'cmd (concat "msf-console-module " module " \"" command "\" \""
                               (msf>render-opts-oneline options) "\";"))
+
     (msf>eshell-console cmd module)))
 
 (defun msf>module-run-tmux-window (module options command)
   "Load MODULE, set OPTIONS and run COMMAND in new Tmux window."
-  (alert (concat "Launch " module " with Tmux! Options:\n" (msf>render-opts options))
-         :icon "kali-metasploit"
-         :title "Metasploit - Launching module!"
-         :category 'pwnage)
+  (funcall msf-module-run-function module options command)
   (msf>tmux-run (concat "msf-module " module " \"" command "\" \""
                         (msf>render-opts-oneline options) "\";")))
 

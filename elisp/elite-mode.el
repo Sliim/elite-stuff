@@ -25,7 +25,11 @@
 (require 'popwin)
 (require 'alert)
 
-(defvar elite-mode-hook nil)
+(defvar elite-mode-hook nil
+  "Elite mode hook.")
+
+(defcustom elite-reports-directory "reports/"
+  "Directory for generated reports.")
 
 (defvar elite-mode-map
   (let ((map (make-keymap)))
@@ -118,7 +122,19 @@
   (dolist (b (buffer-list))
     (set-buffer b)
     (if (not (string-match "^ ?\\*" (buffer-name)))
-        (write-file (buffer-name)))))
+        (write-file (concat elite-reports-directory (buffer-name))))))
+
+(defun elite-notify-and-save-resources (module options command)
+  "Notifications and save resources when launching modules."
+  (alert (concat "Launch " module " with options:\n" (msf>render-opts options))
+         :icon "kali-metasploit"
+         :title "Metasploit - Launching module!"
+         :category 'pwnage)
+  (with-temp-buffer
+    (insert (concat "use " module "\n" (msf>render-opts-cli options) "\n" command))
+    (write-file (concat elite-reports-directory (format-time-string "%s") "-" (msf>eshell-buffer-name module) ".rc"))))
+
+(setq msf-module-run-function 'elite-notify-and-save-resources)
 
 (run-at-time 0 60 'elite-update-mode-line)
 (push '("*elite-mode*" :stick t :height 35 :position top) popwin:special-display-config)

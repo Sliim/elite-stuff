@@ -46,6 +46,13 @@
       (setf opts-str (concat opts-str "\n" (car opt) " " (cdr opt))))
     opts-str))
 
+(defun msf>render-opts-cli (opts)
+  "Render OPTS list in multiple line string for resources generation."
+  (let ((opts-str ""))
+    (dolist (opt opts)
+      (setf opts-str (concat opts-str "\nset " (car opt) " " (cdr opt))))
+    opts-str))
+
 (defun msf>render-opts-oneline (opts)
   "Render OPTS list in one line string."
   (let ((opts-list '()))
