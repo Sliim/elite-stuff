@@ -52,7 +52,7 @@
 (defvar msf/module-actions
   '(("Module Infos" .
      (lambda (candidate)
-       (msf>async-shell-command (concat "msf-module " candidate " info;"))))
+       (msf>shell-command (concat "msf-module " candidate " info;"))))
     ("Open in Console" .
      (lambda (_candidate)
        (dolist (candidate (helm-marked-candidates))
