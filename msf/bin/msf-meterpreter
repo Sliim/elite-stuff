@@ -25,8 +25,9 @@ class MsfMeterpreter(rpcutils.MsfCmd):
         data = self.client.call("session.meterpreter_read", [self.sid])
         for search in ["Channel (\d+) created",
                        "Interacting with channel (\d+)..."]:
-            if re.search(search, data.get("data")):
-                self.channel = re.search(search, data.get("data")).group(1)
+            matches = re.search(search, data.get("data"))
+            if matches:
+                self.channel = matches.group(1)
         return data
 
     def onecmd(self, cmd):

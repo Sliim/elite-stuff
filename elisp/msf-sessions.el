@@ -67,6 +67,10 @@
      (lambda (candidate)
        (let ((msf/current-sessid (msf>get-session-id-from-candidate candidate)))
          (helm-msf-find-compatible-modules msf/current-sessid))))
+    ("Find local exploits" .
+     (lambda (candidate)
+       (let ((msf/current-sessid (msf>get-session-id-from-candidate candidate)))
+         (helm-msf-find-local-exploits msf/current-sessid))))
     ("Add routes" .
      (lambda (_candidate)
        (dolist (candidate (helm-marked-candidates))
@@ -107,6 +111,15 @@
     :action msf/post-module-actions)
   "MSF session post modules helm source definition.")
 
+(defvar msf/c-source-session-local-exploits
+  (helm-build-in-buffer-source "MSF Local exploits"
+    :init (lambda ()
+            (with-current-buffer (helm-candidate-buffer 'local)
+              (alert (concat "Searching local exploits for session #" msf/current-sessid "..") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage :severity 'high)
+              (insert (shell-command-to-string (concat "msf-local-exploits-suggester " msf/current-sessid)))))
+    :action msf/exploits-module-actions)
+  "MSF session local exploits suggester helm source definition.")
+
 (defun msf>get-session-id-from-candidate (candidate)
   "Get Session ID from CANDIDATE."
   (substring candidate 0 (string-match " - " candidate)))
@@ -117,6 +130,14 @@
         :candidate-number-limit 999
         :buffer (concat "*msf-session-" sessid "-post*")
         :prompt "MSF post> "
+        :full-frame nil))
+
+(defun helm-msf-find-local-exploits (sessid)
+  "Find local exploits for this SESSID."
+  (helm :sources '(msf/c-source-session-local-exploits)
+        :candidate-number-limit 999
+        :buffer (concat "*msf-session-" sessid "-local-exploits*")
+        :prompt "MSF exploits> "
         :full-frame nil))
 
 ;;;###autoload
