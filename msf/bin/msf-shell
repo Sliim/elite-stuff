@@ -13,15 +13,15 @@ class MsfShell(rpcutils.MsfCmd):
         self.prompt = "#%s Shell> " % self.sid
 
     def read_data(self):
+        time.sleep(1)
         return self.client.call("session.shell_read", [self.sid])
 
     def onecmd(self, cmd):
         self.wait_lock()
-        self.lock()
-
         if cmd in ["exit", "EOF"]: self.do_exit(cmd); return True
+
+        self.lock()
         self.client.call("session.shell_write", [self.sid, "%s\n" % cmd])
-        time.sleep(1)
         print self.read_data().get("data")
         self.unlock()
 

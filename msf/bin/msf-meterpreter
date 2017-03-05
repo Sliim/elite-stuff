@@ -5,25 +5,43 @@ sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 import rpcutils
 import time
+import re
 
 class MsfMeterpreter(rpcutils.MsfCmd):
     def __init__(self, sid):
         rpcutils.MsfCmd.__init__(self)
-
+        self.channel = None
         self.sid = sid
-        self.prompt = "#%s meterpreter> " % self.sid
+        self.update_prompt()
+
+    def update_prompt(self):
+        if self.channel:
+            self.prompt = "#%s meterpreter - shell #%s> " % (self.sid, self.channel)
+        else:
+            self.prompt = "#%s meterpreter> " % self.sid
 
     def read_data(self):
-        return self.client.call("session.meterpreter_read", [self.sid])
+        time.sleep(1)
+        data = self.client.call("session.meterpreter_read", [self.sid])
+        for search in ["Channel (\d+) created",
+                       "Interacting with channel (\d+)..."]:
+            if re.search(search, data.get("data")):
+                self.channel = re.search(search, data.get("data")).group(1)
+        return data
 
     def onecmd(self, cmd):
         self.wait_lock()
-        self.lock()
-
         if cmd in ["exit", "EOF"]: self.do_exit(cmd); return True
-        self.client.call("session.meterpreter_write", [self.sid, "%s\r\n" % cmd])
-        time.sleep(1)
-        print self.read_data().get("data")
+
+        self.lock()
+        if cmd in ["detach"]:
+            self.client.call("session.meterpreter_session_detach", [self.sid])
+            self.channel = None
+        else:
+            self.client.call("session.meterpreter_write", [self.sid, "%s\n" % cmd])
+            print self.read_data().get("data")
+
+        self.update_prompt()
         self.unlock()
 
 if __name__ == '__main__':
