@@ -14,8 +14,8 @@ def collect_data():
     for ws in ws_list:
         if current_ws and current_ws != ws["name"]: continue
         if args.workspace and args.workspace != ws["name"]: continue
-        hosts = client.call('db.hosts', [{'workspace': ws["name"]}])
-        services = client.call('db.services', [{"workspace": ws["name"]}])
+        hosts = client.call('db.hosts', [{'workspace': ws["name"], "limit": 1337}])
+        services = client.call('db.services', [{"workspace": ws["name"], "limit": 1337}])
         if not rpcutils.check_resp(hosts): continue
         if not rpcutils.check_resp(services): continue
 

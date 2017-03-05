@@ -50,7 +50,9 @@ Workspace status:
 
     panel += "\n=====================================\nHosts:===== \n"
     for h in hosts:
-        host_services = client.call('db.services', [{'workspace': current_ws, "address": h.get("address")}]).get("services")
+        host_services = client.call('db.services', [{"workspace": current_ws,
+                                                     "limit": 1337,
+                                                     "address": h.get("address")}]).get("services")
         host_vulns = client.call('db.vulns', [{'workspace': current_ws, "address": h.get("address")}]).get("vulns")
         panel += "* %s (%s %s)\n" % (h.get('address'), h.get('os_name'), h.get('purpose'))
         panel += "> MAC: %s\n" % h.get('mac')

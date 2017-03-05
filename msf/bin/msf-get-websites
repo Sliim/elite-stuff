@@ -16,7 +16,7 @@ def collect_data():
     for ws in ws_list:
         if current_ws and current_ws != ws["name"]: continue
         if args.workspace and args.workspace != ws["name"]: continue
-        s = client.call("db.services", [{"workspace": ws["name"]}])
+        s = client.call("db.services", [{"workspace": ws["name"], "limit": 1337}])
         if not rpcutils.check_resp(s): continue
         for service in s["services"]:
             if service["port"] in web_ports:
