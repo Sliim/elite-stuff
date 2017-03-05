@@ -345,6 +345,14 @@ Recurse only to depth MAXDEPTH.  If zero or negative, then do not recurse."
         :prompt "msf> "
         :full-frame t))
 
+(defun msf-eshell-console-from-resource-buffer ()
+  "Run eshell console and load current buffer as a msf resource."
+  (interactive)
+  (let ((cmds '("msf-console"))
+        (buffer-name (file-name-sans-extension (buffer-name))))
+    (add-to-list 'cmds (buffer-substring (point-min) (point-max)) t)
+    (msf>eshell-console cmds buffer-name)))
+
 (provide 'msf)
 
 ;;; msf.el ends here
