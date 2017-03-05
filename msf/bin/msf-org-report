@@ -51,14 +51,15 @@ def collect_data():
                 data += "Data: \n#+BEGIN_SRC ruby :results output\nrequire 'json'\ndata=%s\nputs data.to_json\n#+END_SRC\n" % n.get("data")
 
             data += "\n**** Creds:\n"
-            creds = client.call('db.creds', [{"workspace": ws["name"], "limit": 13337, "addresses": h.get("address")}])
+            creds = client.call('db.creds', [{"workspace": ws["name"]}])
             for c in creds["creds"]:
-                data += "- %s (%s/%s) - %s:%s)\n" % (
-                    c.get("sname"),
-                    c.get("proto"),
-                    c.get("port"),
-                    c.get("user"),
-                    c.get("pass"))
+                if h.get("address") == c.get("host"):
+                    data += "- %s (%s/%s) - %s:%s)\n" % (
+                        c.get("sname"),
+                        c.get("proto"),
+                        c.get("port"),
+                        c.get("user"),
+                        c.get("pass"))
     return data
 
 if args.follow:
