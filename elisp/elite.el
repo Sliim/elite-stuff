@@ -71,4 +71,3 @@
 (msf>eshell-console '("msf-console"))
 (elite-mode)
 (elite-teamserver-infos)
-(elite-update-mode-line)

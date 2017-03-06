@@ -8,3 +8,4 @@
 (depends-on "popwin")
 (depends-on "alert")
 (depends-on "ascii")
+(depends-on "async")

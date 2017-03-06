@@ -107,15 +107,6 @@
   (interactive)
   (alert (concat "Elite mode started\n" (shell-command-to-string "msf-infos;echo;msf-status")) :title "EliteStuff" :category 'pwnage))
 
-(defun elite-update-mode-line ()
-  "Update elite mode-line"
-  (message "Updating mode-line..")
-  (setq-default mode-line-format
-        (list
-         (shell-command-to-string "msf-mode-line")
-         minor-mode-alist))
-  (message "Done."))
-
 (defun elite-save-buffers ()
   "Save all buffers in elite-mode."
   (interactive)
@@ -136,7 +127,13 @@
 
 (setq msf-module-run-function 'elite-notify-and-save-resources)
 
-(run-at-time 0 60 'elite-update-mode-line)
 (push '("*elite-mode*" :stick t :height 35 :position top) popwin:special-display-config)
+
+(run-at-time 0 60 'async-start
+             (lambda ()
+               (shell-command-to-string "msf-mode-line"))
+             (lambda (result)
+               (setq-default mode-line-format
+                             (list result minor-mode-alist))))
 
 (provide 'elite-mode)

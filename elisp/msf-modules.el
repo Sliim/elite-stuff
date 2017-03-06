@@ -75,7 +75,7 @@
 (defun msf>module-run-async-shell (module options command)
   "Load MODULE, set OPTIONS and run COMMAND in async shell."
   (funcall msf-module-run-function module options command)
-  (msf>async-shell-command (concat "msf-module " module " \"" command "\" \""
+  (msf>async-process "msf-module" (concat module " \"" command "\" \""
                                    (msf>render-opts-oneline options) "\";")))
 
 (defun msf>module-run-eshell-console (module options command)
@@ -153,14 +153,14 @@
   (append '(("Generate payload" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>eshell-command (concat "msf-module " candidate " \"generate "
+                 (msf>shell-command (concat "msf-module " candidate " \"generate "
                                              (read-string (concat "Command line options for " candidate ": ")) "\";")))))
             ("Start handler" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>async-shell-command (concat "msf-handler " candidate " \""
-                                                  (msf>render-opts-oneline
-                                                   (msf>merge-with-current-opts (msf>read-module-opts candidate))) "\";"))))))
+                 (msf>async-process "msf-handler" (concat candidate " \""
+                                                          (msf>render-opts-oneline
+                                                           (msf>merge-with-current-opts (msf>read-module-opts candidate))) "\";"))))))
           msf/module-actions)
   "MSF Payloads modules actions.")
 
