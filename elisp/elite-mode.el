@@ -28,7 +28,7 @@
 (defvar elite-mode-hook nil
   "Elite mode hook.")
 
-(defcustom elite-reports-directory "reports/"
+(defcustom elite-reports-directory (file-truename "reports/")
   "Directory for generated reports.")
 
 (defvar elite-mode-map
@@ -52,7 +52,7 @@
     (define-key map "q" 'kill-this-buffer)
     (define-key map "H" 'helm-h4x0r)
     (define-key map "I" 'elite-teamserver-infos)
-    (define-key map "R" 'elite-mode)
+    (define-key map "g" 'elite-mode)
     (define-key map (kbd "o e") 'msf>read-opts)
     (define-key map (kbd "o c") 'msf>clear-opts)
     (define-key map (kbd "b s") 'elite-save-buffers)
@@ -73,7 +73,7 @@
       (insert "================\n")
       (insert (concat "\n TeamServer: [" (getenv "MSFRPC_HOST") ":" (getenv "MSFRPC_PORT") "]\n"))
       (insert "----------------------\n")
-      (insert "R - Refresh  |  I - TeamServer Infos |  C - Create console\n")
+      (insert "g - Refresh  |  I - TeamServer Infos |  C - Create console\n")
       (insert "\n")
       (insert "w - Workspaces  |  h - Hosts    |  s - Services\n")
       (insert "n - Notes       |  v - Vulns    |  p - Creds\n")
