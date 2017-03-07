@@ -302,16 +302,16 @@ Recurse only to depth MAXDEPTH.  If zero or negative, then do not recurse."
     (eshell-send-input))
   (end-of-buffer))
 
-(defun msf>async-process (prog args)
+(defun msf>async-process (prog &rest args)
   "Run Asynchronous process with given PROG with ARGS."
-  (async-start-process prog prog
-                       (lambda (proc)
-                         (message "Async process %s finished: %d" proc (process-exit-status proc))
-                         (alert (format "%s - exitstatus: %d" proc (process-exit-status proc))
-                                :icon "kali-shellnoob"
-                                :title "Async process finished"
-                                :category 'pwnage))
-                       args)
+  (apply #'async-start-process prog prog
+         (lambda (proc)
+           (message "Async process %s finished: %d" proc (process-exit-status proc))
+           (alert (format "%s - exitstatus: %d" proc (process-exit-status proc))
+                  :icon "kali-shellnoob"
+                  :title "Async process finished"
+                  :category 'pwnage))
+         args)
   (alert (concat "Started " prog " async process")
          :icon "kali-shellnoob"
          :title "Async process started"

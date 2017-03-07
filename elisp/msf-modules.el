@@ -75,8 +75,7 @@
 (defun msf>module-run-async-shell (module options command)
   "Load MODULE, set OPTIONS and run COMMAND in async shell."
   (funcall msf-module-run-function module options command)
-  (msf>async-process "msf-module" (concat module " \"" command "\" \""
-                                   (msf>render-opts-oneline options) "\";")))
+  (msf>async-process "msf-module" module command (msf>render-opts-oneline options)))
 
 (defun msf>module-run-eshell-console (module options command)
   "Load MODULE, set OPTIONS and run COMMAND in eshell."
@@ -97,7 +96,7 @@
   (append '(("Launch module with defined options" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>module-run-async-shell candidate (msf>get-current-opts) "run -j"))))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "run -j"))))
             ("Launch modules and set options" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -117,7 +116,7 @@
   (append '(("Launch module with defined options" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>module-run-async-shell candidate (msf>get-current-opts) "exploit -j -z"))))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "exploit -j -z"))))
             ("Launch modules and set options" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -137,7 +136,7 @@
   (append '(("Launch module" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>module-run-async-shell candidate (msf>get-current-opts) "run -j"))))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "run -j"))))
             ("Launch modules in new console" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -158,9 +157,7 @@
             ("Start handler" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>async-process "msf-handler" (concat candidate " \""
-                                                          (msf>render-opts-oneline
-                                                           (msf>merge-with-current-opts (msf>read-module-opts candidate))) "\";"))))))
+                 (msf>async-process "msf-handler" candidate (msf>render-opts-oneline (msf>merge-with-current-opts (msf>read-module-opts candidate))))))))
           msf/module-actions)
   "MSF Payloads modules actions.")
 

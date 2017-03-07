@@ -105,7 +105,11 @@
 (defun elite-teamserver-infos ()
   "Show TeamServer Infos notification."
   (interactive)
-  (alert (concat "Elite mode started\n" (shell-command-to-string "msf-infos;echo;msf-status")) :title "EliteStuff" :category 'pwnage))
+  (async-start
+   (lambda ()
+     (shell-command-to-string "msf-infos;echo;msf-status"))
+   (lambda (result)
+     (alert (concat "Elite mode started\n" result) :title "EliteStuff" :category 'pwnage))))
 
 (defun elite-save-buffers ()
   "Save all buffers in elite-mode."

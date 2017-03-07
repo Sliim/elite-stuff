@@ -64,7 +64,7 @@
          (when (string-match "AsyncShell" candidate)
            (let ((opts (read-string "Nmap options: "))
                  (target (read-string "Target: ")))
-             (msf>async-process "nmap" (concat opts " " target))))
+             (msf>async-process "nmap" opts target)))
          (when (string-match "Tmux" candidate)
            (let ((opts (read-string "Nmap options: "))
                  (target (read-string "Target: ")))
