@@ -9,20 +9,13 @@
 
 ;;; Commentary:
 
-;; Emacs helm interfaces for The Metasploit Framework.
-;; Provides search capability for metasploit modules, tools,
-;; plugins and scripts.
-;;
-;; Currently, Metasploit's modules, plugins, tools and scripts are
-;; loaded from the metasploit-framework sources.  Others sources will
-;; be added to expand the helm candidates such as custom modules and
-;; msfrpc interaction.
+;; Provides metasploit's services interaction.
 
 ;; Usage:
 ;;
 ;; Copy this file in your loadpath and:
 ;;
-;;     M-x helm-services
+;;     M-x helm-msf-services
 
 ;;; License:
 
@@ -50,28 +43,51 @@
      (lambda (candidate)
        (let ((msf/current-rport (msf>get-port-from-services-candidate candidate))
              (msf/current-rhost (msf>get-host-from-services-candidate candidate))
-             (msf/current-sname (msf>get-service-name-from-candidate candidate)))
+             (msf/current-sname (msf>get-service-name-from-candidate candidate))
+             (msf/current-ros ""))
          (helm-msf-search-auxiliary msf/current-sname))))
     ("Search Scanners" .
      (lambda (candidate)
        (let ((msf/current-rport (msf>get-port-from-services-candidate candidate))
              (msf/current-rhost (msf>get-host-from-services-candidate candidate))
-             (msf/current-sname (msf>get-service-name-from-candidate candidate)))
-         (helm-search-scanners msf/current-sname))))
-    ("Search Exploits" .
+             (msf/current-sname (msf>get-service-name-from-candidate candidate))
+             (msf/current-ros "scanner"))
+         (helm-msf-search-auxiliary msf/current-sname))))
+    ("Search Auxiliary (All)" .
+     (lambda (candidate)
+       (let ((msf/current-rport (msf>get-port-from-services-candidate candidate))
+             (msf/current-rhost (msf>get-host-from-services-candidate candidate))
+             (msf/current-sname "")
+             (msf/current-ros ""))
+         (helm-msf-search-auxiliary msf/current-sname))))
+    ("Search all Exploits" .
+     (lambda (candidate)
+       (let ((msf/current-rport (msf>get-port-from-services-candidate candidate))
+             (msf/current-rhost (msf>get-host-from-services-candidate candidate))
+             (msf/current-sname "")
+             (msf/current-ros ""))
+         (helm-msf-search-exploits msf/current-sname))))
+    ("Search Exploits for this service name" .
      (lambda (candidate)
        (let ((msf/current-rport (msf>get-port-from-services-candidate candidate))
              (msf/current-rhost (msf>get-host-from-services-candidate candidate))
              (msf/current-sname (msf>get-service-name-from-candidate candidate))
              (msf/current-ros ""))
-         (helm-search-exploits msf/current-sname))))
+         (helm-msf-search-exploits msf/current-sname))))
     ("Search Exploits for this platform" .
+     (lambda (candidate)
+       (let ((msf/current-rport (msf>get-port-from-services-candidate candidate))
+             (msf/current-rhost (msf>get-host-from-services-candidate candidate))
+             (msf/current-sname "")
+             (msf/current-ros (msf>get-os-name-from-candidate candidate)))
+         (helm-msf-search-exploits msf/current-sname))))
+    ("Search Exploits for this service name and platform" .
      (lambda (candidate)
        (let ((msf/current-rport (msf>get-port-from-services-candidate candidate))
              (msf/current-rhost (msf>get-host-from-services-candidate candidate))
              (msf/current-sname (msf>get-service-name-from-candidate candidate))
              (msf/current-ros (msf>get-os-name-from-candidate candidate)))
-         (helm-search-exploits msf/current-sname)))))
+         (helm-msf-search-exploits msf/current-sname)))))
   "MSF Services actions.")
 
 (defvar msf/c-source-services
@@ -83,63 +99,52 @@
     :action msf/services-actions)
   "MSF Services helm source definition.")
 
-(defvar msf/c-source-auxiliary
-  (helm-build-in-buffer-source "MSF Auxiliaries"
+(defvar msf/c-source-auxiliary-modules
+  (helm-build-in-buffer-source "MSF Auxiliary"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (alert (concat "Searching auxiliary modules for " msf/current-sname " service") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
-              (insert (shell-command-to-string (concat "msf-search-auxiliary " msf/current-sname)))))
+              (alert (concat "Searching auxiliary modules for `" msf/current-sname "` service") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
+              (insert (shell-command-to-string (concat "msf-search-modules auxiliary " msf/current-sname " " msf/current-ros)))))
     :action msf/auxiliary-module-actions)
   "MSF auxiliary modules helm source definition.")
-(defvar msf/c-source-scanners
-  (helm-build-in-buffer-source "MSF Scanners"
-    :init (lambda ()
-            (with-current-buffer (helm-candidate-buffer 'local)
-              (alert (concat "Searching scanner modules for " msf/current-sname " service") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
-              (insert (shell-command-to-string (concat "msf-search-scanners " msf/current-sname)))))
-    :action msf/auxiliary-module-actions)
-  "MSF scanner modules helm source definition.")
-(defvar msf/c-source-exploits
+(defvar msf/c-source-exploits-modules
   (helm-build-in-buffer-source "MSF Exploits"
     :init (lambda ()
             (with-current-buffer (helm-candidate-buffer 'local)
-              (alert (concat "Searching exploit modules for " msf/current-sname " service, platform: " msf/current-ros) :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
-              (insert (shell-command-to-string (concat "msf-search-exploits " msf/current-sname " " msf/current-ros)))))
+              (alert (concat "Searching exploit modules for `" msf/current-sname "` service, platform: `" msf/current-ros "`") :icon "kali-metasploit" :title "Metasploit" :category 'pwnage)
+              (insert (shell-command-to-string (concat "msf-search-modules exploits " msf/current-sname " " msf/current-ros)))))
     :action msf/exploits-module-actions)
   "MSF exploit modules helm source definition.")
 
 (defun msf>get-port-from-services-candidate (candidate)
+  "Get service's port from helm CANDIDATE string."
   (let ((service (substring candidate 0 (string-match " " candidate))))
     (substring service (1+ (string-match ":" service)))))
 (defun msf>get-host-from-services-candidate (candidate)
+  "Get service's host from helm CANDIDATE string."
   (let ((service (substring candidate 0 (string-match " " candidate))))
     (substring service 0 (string-match ":" service))))
 (defun msf>get-service-name-from-candidate (candidate)
+  "Get service's name from helm CANDIDATE string."
   (if (string-match "\\([a-z]\\)\\/\\([a-zA-Z0-9]+\\)" candidate)
       (match-string 2 candidate)
     "/"))
 (defun msf>get-os-name-from-candidate (candidate)
+  "Get service's operating system from helm CANDIDATE string."
   (if (string-match "- \\([a-zA-Z0-9]+\\) " candidate)
       (match-string 1 candidate)
     "/"))
 
 (defun helm-msf-search-auxiliary (sname)
   "Find MSF Auxiliary for given SNAME."
-  (helm :sources '(msf/c-source-auxiliary)
+  (helm :sources '(msf/c-source-auxiliary-modules)
         :candidate-number-limit 999
         :buffer (concat "*msf-auxiliary-" sname "*")
         :prompt "MSF auxiliary> "
         :full-frame nil))
-(defun helm-search-scanners (sname)
-  "Find MSF Scanners for given SNAME."
-  (helm :sources '(msf/c-source-scanners)
-        :candidate-number-limit 999
-        :buffer (concat "*msf-scanners-" sname "*")
-        :prompt "MSF scanners> "
-        :full-frame nil))
-(defun helm-search-exploits (sname)
+(defun helm-msf-search-exploits (sname)
   "Find MSF Exploits for given SNAME."
-  (helm :sources '(msf/c-source-exploits)
+  (helm :sources '(msf/c-source-exploits-modules)
         :candidate-number-limit 999
         :buffer (concat "*msf-exploits-" sname "*")
         :prompt "MSF exploits> "
