@@ -110,7 +110,7 @@
     (message msg)
     (alert msg :icon "kali-metasploit" :title "Loading Module options.." :category 'pwnage)
     (let ((bufname (concat "*module-options-" module "*"))
-          (options (concat "Options for " module ":\n\n" (shell-command-to-string (concat "msf-module " candidate " info;")))))
+          (options (concat "Options for " module ":\n\n" (shell-command-to-string (concat "msf-module " module " info;")))))
       (get-buffer-create bufname)
       (switch-to-buffer bufname)
       (with-current-buffer bufname
@@ -118,3 +118,5 @@
   (msf>read-opts))
 
 (provide 'msf-opts)
+
+;;; msf-opts.el ends here
