@@ -153,11 +153,15 @@
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (msf>shell-command (concat "msf-module " candidate " \"generate "
-                                             (read-string (concat "Command line options for " candidate ": ")) "\";")))))
-            ("Start handler" .
+                                            (read-string (concat "Command line options for " candidate ": ")) "\";")))))
+            ("Set options and Start handler" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>async-process "msf-handler" candidate (msf>render-opts-oneline (msf>merge-with-current-opts (msf>read-module-opts candidate))))))))
+                 (msf>async-process "msf-handler" candidate (msf>render-opts-oneline (msf>merge-with-current-opts (msf>read-module-opts candidate)))))))
+            ("Start handler with defined options" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>async-process "msf-handler" candidate (msf>render-opts-oneline (msf>merge-with-current-opts msf/user-opts)))))))
           msf/module-actions)
   "MSF Payloads modules actions.")
 
