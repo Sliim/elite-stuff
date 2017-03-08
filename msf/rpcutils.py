@@ -54,6 +54,7 @@ def parse_module_opts(options):
     for o in options.split(";;"):
         o = o.split("=>")
         opts[o[0]] = o[1]
+    return opts.iteritems()
 
 
 def ncurses(collector):
