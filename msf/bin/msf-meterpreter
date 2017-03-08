@@ -23,11 +23,12 @@ class MsfMeterpreter(rpcutils.MsfCmd):
     def read_data(self):
         time.sleep(1)
         data = self.client.call("session.meterpreter_read", [self.sid])
-        for search in ["Channel (\d+) created",
-                       "Interacting with channel (\d+)..."]:
-            matches = re.search(search, data.get("data"))
-            if matches:
-                self.channel = matches.group(1)
+        if data.get("data"):
+            for search in ["Channel (\d+) created",
+                           "Interacting with channel (\d+)..."]:
+                matches = re.search(search, data.get("data"))
+                if matches:
+                    self.channel = matches.group(1)
         return data
 
     def onecmd(self, cmd):
