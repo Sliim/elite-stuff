@@ -20,6 +20,7 @@
 (require 'msf-vulns)
 (require 'msf-loots)
 (require 'msf-modules)
+(require 'elite-history)
 (require 'helm-h4x0r)
 (require 'exploitdb)
 (require 'popwin)
@@ -121,6 +122,7 @@
 
 (defun elite-notify-and-save-resources (module options command)
   "Notifications and save resources when launching modules."
+  (add-to-list 'elite/modules-history `(,module ,command ,options))
   (alert (concat "Launch " module " with options:\n" (msf>render-opts options))
          :icon "kali-metasploit"
          :title "Metasploit - Launching module!"
