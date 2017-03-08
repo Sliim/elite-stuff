@@ -131,11 +131,19 @@
 
 (defvar msf/script-actions
   (append msf/common-file-actions
-          '(("[EShell] Launch resources" .
+          '(("Launch resources" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (let ((cmd '()))
                    (add-to-list 'cmd (concat "msf-resource " (file-name-nondirectory (concat candidate ".rc"))
+                                             " " (msf>render-opts-oneline
+                                                  (msf>merge-with-current-opts (msf>read-opts))) ";"))
+                   (msf>eshell-console cmd (concat "Resource-" candidate))))))
+            ("Launch resources in console" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (let ((cmd '()))
+                   (add-to-list 'cmd (concat "msf-console-resource " (file-name-nondirectory (concat candidate ".rc"))
                                              " " (msf>render-opts-oneline
                                                   (msf>merge-with-current-opts (msf>read-opts))) ";"))
                    (msf>eshell-console cmd (concat "Resource-" candidate))))))
@@ -145,6 +153,14 @@
                  (let ((r (file-name-nondirectory (concat candidate ".rc"))))
                    (msf>tmux-run-and-wait (concat "msf-resource " r " " (msf>render-opts-oneline
                                                                 (msf>merge-with-current-opts (msf>read-opts))) ";"))))
+               (helm-msf-files)))
+            ("[Tmux] Launch resources in console" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (let ((r (file-name-nondirectory (concat candidate ".rc"))))
+                   (msf>tmux-run-and-wait (concat "msf-console-resource " r
+                                                  " " (msf>render-opts-oneline
+                                                       (msf>merge-with-current-opts (msf>read-opts))) ";"))))
                (helm-msf-files)))))
   "MSF Script actions.")
 
