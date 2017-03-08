@@ -9,20 +9,13 @@
 
 ;;; Commentary:
 
-;; Emacs helm interfaces for The Metasploit Framework.
-;; Provides search capability for metasploit modules, tools,
-;; plugins and scripts.
-;;
-;; Currently, Metasploit's modules, plugins, tools and scripts are
-;; loaded from the metasploit-framework sources.  Others sources will
-;; be added to expand the helm candidates such as custom modules and
-;; msfrpc interaction.
+;; Manage msf hosts from Emacs helm
 
 ;; Usage:
 ;;
 ;; Copy this file in your loadpath and:
 ;;
-;;     M-x helm-hosts
+;;     M-x helm-msf-hosts
 
 ;;; License:
 
@@ -61,6 +54,13 @@
            (msf>tmux-run-and-wait (concat "nmap " opts " " (msf>get-host-from-candidate candidate))
                                   (concat "nmap-" (msf>get-host-from-candidate candidate)))))
        (helm-msf-hosts)))
+    ("Search PortScanner modules" .
+     (lambda (candidate)
+       (let ((msf/current-rport nil)
+             (msf/current-rhost (msf>get-host-from-services-candidate candidate))
+             (msf/current-sname "")
+             (msf/current-ros "portscan"))
+         (helm-msf-search-auxiliary "portscan"))))
     ("Search vulns" .
      (lambda (candidate)
        (let ((msf/current-rhost (msf>get-host-from-candidate candidate)))
