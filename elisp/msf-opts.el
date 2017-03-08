@@ -57,8 +57,8 @@
   "Render OPTS list in one line string."
   (let ((opts-list '()))
     (dolist (opt opts)
-      (setf opts-list (add-to-list 'opts-list (concat (car opt) "=" (cdr opt)) t)))
-    (mapconcat 'identity opts-list ";")))
+      (setf opts-list (add-to-list 'opts-list (concat (car opt) "=>" (cdr opt)) t)))
+    (mapconcat 'identity opts-list ";;")))
 
 (defun msf>get-current-opts ()
   "Retrieve current options."

@@ -18,10 +18,9 @@ cid = client.call("console.create", [{}])["id"]
 client.call("console.read", [cid])
 
 if len(sys.argv) == 3:
-    opts = sys.argv[2].split(";")
-    for o in opts:
-        o = o.split("=")
-        cmds.append("set %s %s" % (o[0], o[1]))
+    opts = rpcutils.parse_module_opts(sys.argv[2])
+    for k, v in opts:
+        cmds.append("set %s %s" % (k, v))
 
 cmds.append("resource %s" % sys.argv[1])
 cmds.append("")

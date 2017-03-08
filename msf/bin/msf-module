@@ -2,8 +2,8 @@
 # -*- coding:utf-8 -*-
 #
 # Usage:
-#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor exploit RHOST=192.168.42.11;RPORT=21;TARGET=0
-#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor check RHOST=192.168.42.11;RPORT=21;TARGET=0
+#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor exploit RHOST=>192.168.42.11;;RPORT=>21;;TARGET=>0
+#  - msf-module exploit/unix/ftp/vsftpd_234_backdoor check RHOST=>192.168.42.11;;RPORT=>21;;TARGET=>0
 #  - msf-module exploit/unix/ftp/vsftpd_234_backdoor options
 #  - msf-module exploit/unix/ftp/vsftpd_234_backdoor info
 #  - msf-module exploit/unix/ftp/vsftpd_234_backdoor "show targets"
@@ -26,10 +26,9 @@ cid = client.call("console.create", [{}])["id"]
 client.call("console.read", [cid])
 cmds.append("use %s" % sys.argv[1])
 if len(sys.argv) == 4:
-    opts = sys.argv[3].split(";")
-    for o in opts:
-        o = o.split("=")
-        cmds.append("set %s %s" % (o[0], o[1]))
+    opts = rpcutils.parse_module_opts(sys.argv[3])
+    for k, v in opts:
+        cmds.append("set %s %s" % (k, v))
 
 cmds.append(sys.argv[2])
 cmds.append("")

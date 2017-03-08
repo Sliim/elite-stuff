@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #
 # Usage:
-#   msf-handler python/meterpreter/reverse_tcp LPORT=43434,LHOST=192.168.42.6
+#   msf-handler python/meterpreter/reverse_tcp LPORT=43434;;LHOST=>192.168.42.6
 #
 
 from os import sys, path
@@ -24,10 +24,9 @@ cmds.append("use multi/handler")
 cmds.append("set PAYLOAD %s" % sys.argv[1])
 
 if len(sys.argv) == 3:
-    opts = sys.argv[2].split(";")
-    for o in opts:
-        o = o.split("=")
-        cmds.append("set %s %s" % (o[0], o[1]))
+    opts = rpcutils.parse_module_opts(sys.argv[2])
+    for k, v in opts:
+        cmds.append("set %s %s" % (k, v))
 
 cmds.append("run -j")
 cmds.append("")

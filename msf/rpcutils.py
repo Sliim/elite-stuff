@@ -49,6 +49,13 @@ def parse_args():
     return parser.parse_args()
 
 
+def parse_module_opts(options):
+    opts = {}
+    for o in options.split(";;"):
+        o = o.split("=>")
+        opts[o[0]] = o[1]
+
+
 def ncurses(collector):
     w = curses.initscr()
     try:
