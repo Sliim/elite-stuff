@@ -63,6 +63,13 @@
 
 (add-to-list 'auto-mode-alist '("*elite-mode*" . elite-mode))
 
+(defun elite-reports-directory-with-teamserver ()
+  "Return reports path with teamserver suffix."
+  (if (and (getenv "MSFRPC_HOST")
+           (getenv "MSFRPC_PORT"))
+      (concat elite-reports-directory (getenv "MSFRPC_HOST") "-" (getenv "MSFRPC_PORT") "/")
+    elite-reports-directory))
+
 (defun elite-mode ()
   "The Elite mode"
   (interactive)
@@ -119,7 +126,7 @@
   (dolist (b (buffer-list))
     (set-buffer b)
     (if (not (string-match "^ ?\\*" (buffer-name)))
-        (write-file (concat elite-reports-directory (buffer-name))))))
+        (write-file (concat (elite-reports-directory-with-teamserver) (buffer-name))))))
 
 (defun elite-notify-and-save-resources (module options command)
   "Notifications and save resources when launching modules."
@@ -130,7 +137,7 @@
          :category 'pwnage)
   (with-temp-buffer
     (insert (concat "use " module "\n" (msf>render-opts-cli options) "\n" command))
-    (write-file (concat elite-reports-directory (format-time-string "%s") "-" (msf>eshell-buffer-name module) ".rc"))))
+    (write-file (concat (elite-reports-directory-with-teamserver) (format-time-string "%s") "-" (msf>eshell-buffer-name module) ".rc"))))
 
 (setq msf-module-run-function 'elite-notify-and-save-resources)
 
