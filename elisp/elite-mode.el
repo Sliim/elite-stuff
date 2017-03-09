@@ -144,6 +144,23 @@
   (elite-save-buffers)
   (elite-save-history))
 
+(defun elite-clean-cache ()
+  "Unbound some variables to force a content refresh."
+  (interactive)
+  (setq msf/exploits-modules nil
+        msf/auxiliary-modules nil
+        msf/payloads-modules nil
+        msf/post-modules nil
+        msf/encoders-modules nil
+        msf/nops-modules nil)
+  (makunbound 'msf-modules)
+  (makunbound 'msf-scripts)
+  (makunbound 'msf-tools)
+  (makunbound 'msf-plugins)
+  (makunbound 'msf-user-modules)
+  (makunbound 'msf-user-scripts)
+  (makunbound 'msf-user-plugins))
+
 (defun elite-notify-and-save-resources (module options command)
   "Notifications and save resources when launching modules."
   (elite>add-module-history module command options)
