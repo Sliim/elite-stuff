@@ -9,22 +9,40 @@ args = rpcutils.parse_args()
 ws_list = client.call("db.workspaces", [])["workspaces"]
 current_ws = client.call("db.current_workspace")["workspace"] if args.current else None
 
+# TODO: Clients
+
+
 def collect_data():
-    data = "* Metasploit Database Org-Mode Report\n"
+    def creds_data(creds, host):
+        res = ""
+        for c in creds:
+            if c.get("host") == host:
+                res += "***** %s: %s (%s/%s)\nLogin: %s\nPass: %s\n" % (
+                    c.get("type"),
+                    c.get("sname"),
+                    c.get("proto"),
+                    c.get("port"),
+                    c.get("user"),
+                    c.get("pass"))
+        return res
+
+    data = "* Metasploit Database Org-Mode Report"
     for ws in ws_list:
         if current_ws and current_ws != ws["name"]: continue
         if args.workspace and args.workspace != ws["name"]: continue
         hosts = client.call('db.hosts', [{'workspace': ws["name"], "limit": 1337}])
         services = client.call('db.services', [{"workspace": ws["name"], "limit": 1337}])
+        creds = client.call('db.creds', [{"workspace": ws["name"]}]).get("creds")
         if not rpcutils.check_resp(hosts): continue
         if not rpcutils.check_resp(services): continue
 
         data += "\n\n** %s workspace\n" % ws["name"].capitalize()
         for h in hosts.get("hosts"):
             if args.item and args.item != h.get("address"): continue
-            data += "\n*** Host %s (%s)\n" % (h.get("address"), h.get("name"))
+            data += "\n*** Host %s %s\n" % (h.get("name"), h.get("address"))
 
-            data += "OS: %s %s (%s)\n" % (h.get('os_name'), h.get('os_purpose'), h.get('os_flavor'))
+            data += "OS: %s %s (%s %s)\n" % (h.get('os_name'), h.get('purpose'), h.get('os_flavor'), h.get('os_sp'))
+            data += "Status: %s\n" % h.get("state")
             data += "Info: %s\n" % h.get("info")
 
             data += "\n**** Services:\n"
@@ -33,7 +51,7 @@ def collect_data():
                 name = s.get("name")
                 if not name:
                     name = "???"
-                data += "- %s %s/%s - %s\n" % (name, s.get("proto"), s.get("port"), s.get("info"))
+                data += "- %s %s/%s (%s) - %s\n" % (name, s.get("proto"), s.get("port"), s.get("state"), s.get("info"))
 
             data += "\n**** Vulnerabilities:\n"
             vulns = client.call('db.vulns', [{"workspace": ws["name"], "limit": 13337, "addresses": h.get("address")}])
@@ -51,15 +69,10 @@ def collect_data():
                 data += "Data: \n#+BEGIN_SRC ruby :results output\nrequire 'json'\ndata=%s\nputs data.to_json\n#+END_SRC\n" % n.get("data")
 
             data += "\n**** Creds:\n"
-            creds = client.call('db.creds', [{"workspace": ws["name"]}])
-            for c in creds["creds"]:
-                if h.get("address") == c.get("host"):
-                    data += "- %s (%s/%s) - %s:%s)\n" % (
-                        c.get("sname"),
-                        c.get("proto"),
-                        c.get("port"),
-                        c.get("user"),
-                        c.get("pass"))
+            data += creds_data(creds, h.get("address"))
+
+        data += "\n\n*** Extra creds\n"
+        data += creds_data(creds, "")
     return data
 
 if args.follow:
