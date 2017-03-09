@@ -51,9 +51,11 @@ def parse_args():
 
 def parse_module_opts(options):
     opts = {}
-    for o in options.split(";;"):
-        o = o.split("=>")
-        opts[o[0]] = o[1]
+    if options != "":
+        for o in options.split(";;"):
+            o = o.split("=>")
+            if len(o) != 2: next
+            opts[o[0]] = o[1]
     return opts.iteritems()
 
 

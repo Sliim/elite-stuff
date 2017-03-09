@@ -135,17 +135,17 @@
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (let ((cmd '()))
-                   (add-to-list 'cmd (concat "msf-resource " (file-name-nondirectory (concat candidate ".rc"))
-                                             " " (msf>render-opts-oneline
-                                                  (msf>merge-with-current-opts (msf>read-opts))) ";"))
+                   (add-to-list 'cmd (concat "msf-resource \"" (file-name-nondirectory (concat candidate ".rc"))
+                                             "\" \"" (msf>render-opts-oneline
+                                                      (msf>merge-with-current-opts (msf>read-opts))) "\";"))
                    (msf>eshell-console cmd (concat "Resource-" candidate))))))
             ("Launch resources in console" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (let ((cmd '()))
-                   (add-to-list 'cmd (concat "msf-console-resource " (file-name-nondirectory (concat candidate ".rc"))
-                                             " " (msf>render-opts-oneline
-                                                  (msf>merge-with-current-opts (msf>read-opts))) ";"))
+                   (add-to-list 'cmd (concat "msf-console-resource \"" (file-name-nondirectory (concat candidate ".rc"))
+                                             "\" \"" (msf>render-opts-oneline
+                                                  (msf>merge-with-current-opts (msf>read-opts))) "\";"))
                    (msf>eshell-console cmd (concat "Resource-" candidate))))))
             ("[Tmux] Launch resources" .
              (lambda (_candidate)
