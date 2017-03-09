@@ -54,6 +54,7 @@
 (require 'emamux)
 (require 'msf-opts)
 (require 'msf-modules)
+(require 'elite-history)
 (require 'async)
 
 (defcustom msf-path "/usr/share/metasploit-framework/"
@@ -300,6 +301,7 @@ Recurse only to depth MAXDEPTH.  If zero or negative, then do not recurse."
 
 (defun msf>eshell-console (cmds &optional buffer-name)
   "Run CMDS in RPC console with eshell.  Set BUFFER-NAME if specified."
+  (elite>add-eshell-history cmds)
   (let ((create-new-buffer t))
     (when buffer-name
       (when (get-buffer (msf>eshell-buffer-name buffer-name))
@@ -320,6 +322,7 @@ Recurse only to depth MAXDEPTH.  If zero or negative, then do not recurse."
 
 (defun msf>async-process (prog &rest args)
   "Run Asynchronous process with given PROG with ARGS."
+  (elite>add-async-history prog args)
   (apply #'async-start-process prog prog
          (lambda (proc)
            (message "Async process %s finished: %d" proc (process-exit-status proc))

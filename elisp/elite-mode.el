@@ -134,7 +134,7 @@
   (with-temp-buffer
     (let ((file (concat (elite-reports-directory-with-teamserver) "history"))
           (coding-system-for-write 'utf-8))
-      (print elite/modules-history (current-buffer))
+      (print elite/history (current-buffer))
       (when (file-writable-p file)
         (write-region (point-min) (point-max) file)))))
 
@@ -146,7 +146,7 @@
 
 (defun elite-notify-and-save-resources (module options command)
   "Notifications and save resources when launching modules."
-  (add-to-list 'elite/modules-history `(,module ,command ,options))
+  (elite>add-module-history module command options)
   (alert (concat "Launch " module " with options:\n" (msf>render-opts options))
          :icon "kali-metasploit"
          :title "Metasploit - Launching module!"
@@ -166,11 +166,7 @@
                (setq-default mode-line-format
                              (list result minor-mode-alist))))
 
-(let ((file (concat (elite-reports-directory-with-teamserver) "history")))
-  (when (file-exists-p file)
-    (with-temp-buffer
-      (insert-file-contents file)
-      (setq elite/modules-history (read (current-buffer))))))
+(elite>load-history (concat (elite-reports-directory-with-teamserver) "history"))
 
 (provide 'elite-mode)
 
