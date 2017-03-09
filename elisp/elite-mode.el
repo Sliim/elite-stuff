@@ -57,7 +57,7 @@
     (define-key map "g" 'elite-mode)
     (define-key map (kbd "o e") 'msf>read-opts)
     (define-key map (kbd "o c") 'msf>clear-opts)
-    (define-key map (kbd "b s") 'elite-save-buffers)
+    (define-key map (kbd "b s") 'elite-save-all)
     map)
   "Keymap for Elite major mode")
 
@@ -128,6 +128,22 @@
     (if (not (string-match "^ ?\\*" (buffer-name)))
         (write-file (concat (elite-reports-directory-with-teamserver) (buffer-name))))))
 
+(defun elite-save-history ()
+  "Write history in reports directory."
+  (interactive)
+  (with-temp-buffer
+    (let ((file (concat (elite-reports-directory-with-teamserver) "history"))
+          (coding-system-for-write 'utf-8))
+      (print elite/modules-history (current-buffer))
+      (when (file-writable-p file)
+        (write-region (point-min) (point-max) file)))))
+
+(defun elite-save-all ()
+  "Save all files."
+  (interactive)
+  (elite-save-buffers)
+  (elite-save-history))
+
 (defun elite-notify-and-save-resources (module options command)
   "Notifications and save resources when launching modules."
   (add-to-list 'elite/modules-history `(,module ,command ,options))
@@ -150,4 +166,12 @@
                (setq-default mode-line-format
                              (list result minor-mode-alist))))
 
+(let ((file (concat (elite-reports-directory-with-teamserver) "history")))
+  (when (file-exists-p file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (setq elite/modules-history (read (current-buffer))))))
+
 (provide 'elite-mode)
+
+;;; elite-mode.el ends here
