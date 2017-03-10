@@ -29,6 +29,9 @@
 (defvar elite-mode-hook nil
   "Elite mode hook.")
 
+(defvar elite-mode-current-session nil
+  "Current elite-mode session.")
+
 (defcustom elite-reports-directory (file-truename "reports/")
   "Directory for generated reports.")
 
@@ -57,7 +60,8 @@
     (define-key map "g" 'elite-mode)
     (define-key map (kbd "o e") 'msf>read-opts)
     (define-key map (kbd "o c") 'msf>clear-opts)
-    (define-key map (kbd "b s") 'elite-save-all)
+    (define-key map (kbd "e s") 'elite-save-all)
+    (define-key map (kbd "e S") 'elite-mode-switch-current-session)
     map)
   "Keymap for Elite major mode")
 
@@ -65,10 +69,10 @@
 
 (defun elite-reports-directory-with-teamserver ()
   "Return reports path with teamserver suffix."
-  (if (and (getenv "MSFRPC_HOST")
-           (getenv "MSFRPC_PORT"))
-      (concat elite-reports-directory (getenv "MSFRPC_HOST") "-" (getenv "MSFRPC_PORT") "/")
-    elite-reports-directory))
+  (let ((dir (concat elite-reports-directory (getenv "MSFRPC_HOST") "-" (getenv "MSFRPC_PORT") "/")))
+    (when elite-mode-current-session
+      (setf dir (concat dir elite-mode-current-session "/")))
+    dir))
 
 (defun elite-mode ()
   "The Elite mode"
@@ -80,6 +84,10 @@
       (erase-buffer)
       (insert "Emacs Elite Mode\n")
       (insert "================\n")
+      (insert (concat "Current session: " elite-mode-current-session "\n"))
+      (insert "e s - Save All Buffers\n")
+      (insert "e S - Create/switch current elite session\n")
+      (insert "----------------------\n")
       (insert (concat "\n TeamServer: [" (getenv "MSFRPC_HOST") ":" (getenv "MSFRPC_PORT") "]\n"))
       (insert "----------------------\n")
       (insert "g - Refresh  |  I - TS Infos |  C - Console | H - History\n")
@@ -102,7 +110,6 @@
       (insert "\n Elite Stuff\n")
       (insert "----------\n")
       (insert "x - Search Sploit |  X - H4x0r Stuff\n")
-      (insert "b s - Save All Buffers\n")
       (insert "\n")
       (insert "q - Quit\n")
       (kill-all-local-variables)
@@ -110,6 +117,11 @@
       (setq mode-name "Elite")
       (use-local-map elite-mode-map)
       (run-hooks 'elite-mode-hook))))
+
+(defun elite-mode-switch-current-session (session)
+  "Switch current elite SESSION."
+  (interactive "sSession name: ")
+  (setq elite-mode-current-session session))
 
 (defun elite-teamserver-infos ()
   "Show TeamServer Infos notification."
