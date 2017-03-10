@@ -302,17 +302,12 @@ Recurse only to depth MAXDEPTH.  If zero or negative, then do not recurse."
 (defun msf>eshell-console (cmds &optional buffer-name)
   "Run CMDS in RPC console with eshell.  Set BUFFER-NAME if specified."
   (elite>add-eshell-history cmds)
-  (let ((create-new-buffer t))
-    (when buffer-name
-      (when (get-buffer (msf>eshell-buffer-name buffer-name))
-        (setq create-new-buffer nil)
-        (switch-to-buffer (msf>eshell-buffer-name buffer-name))))
-
-    (when create-new-buffer
-      (eshell 'Z)
-      (when buffer-name
-        (rename-buffer (msf>eshell-buffer-name buffer-name)))))
-
+  (unless buffer-name
+    (setf buffer-name "eshell-console"))
+  (let ((bufname (concat (msf>eshell-buffer-name buffer-name)
+                         "-" (format-time-string "%s"))))
+    (eshell 'Z)
+    (rename-buffer bufname))
   (dolist (cmd cmds)
     (end-of-buffer)
     (eshell-kill-input)
