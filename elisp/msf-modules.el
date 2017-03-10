@@ -93,18 +93,18 @@
                         (msf>render-opts-oneline options) "\";")))
 
 (defvar msf/auxiliary-module-actions
-  (append '(("Launch module with defined options" .
-             (lambda (_candidate)
-               (dolist (candidate (helm-marked-candidates))
-                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "run -j"))))
-            ("Launch modules and set options" .
-             (lambda (_candidate)
-               (dolist (candidate (helm-marked-candidates))
-                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
-            ("Launch modules in new console" .
+  (append '(("Set options and launch modules in new console" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
+            ("Set options and launch modules" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
+            ("Launch module with defined options" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "run -j"))))
             ("Launch modules in new Tmux window" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -113,18 +113,18 @@
   "MSF Auxiliary module actions.")
 
 (defvar msf/exploits-module-actions
-  (append '(("Launch module with defined options" .
-             (lambda (_candidate)
-               (dolist (candidate (helm-marked-candidates))
-                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "exploit -j -z"))))
-            ("Launch modules and set options" .
-             (lambda (_candidate)
-               (dolist (candidate (helm-marked-candidates))
-                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "exploit -j -z"))))
-            ("Launch modules in new console" .
+  (append '(("Set options and launch modules in new console" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "exploit -j -z"))))
+            ("Set options and launch modules" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "exploit -j -z"))))
+            ("Launch module with defined options" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "exploit -j -z"))))
             ("Launch modules in new Tmux window" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -133,14 +133,14 @@
   "MSF Exploits module actions.")
 
 (defvar msf/post-module-actions
-  (append '(("Launch module" .
-             (lambda (_candidate)
-               (dolist (candidate (helm-marked-candidates))
-                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "run -j"))))
-            ("Launch modules in new console" .
+  (append '(("Set options and launch modules in new console" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
+            ("Launch module with defined options" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-async-shell candidate (msf>merge-with-current-opts msf/user-opts) "run -j"))))
             ("Launch modules in new Tmux window" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -149,19 +149,19 @@
   "MSF Post module actions.")
 
 (defvar msf/payload-module-actions
-  (append '(("Generate payload" .
-             (lambda (_candidate)
-               (dolist (candidate (helm-marked-candidates))
-                 (msf>shell-command (concat "msf-module " candidate " \"generate "
-                                            (read-string (concat "Command line options for " candidate ": ")) "\";")))))
-            ("Set options and Start handler" .
+  (append '(("Set options and Start handler" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (msf>async-process "msf-handler" candidate (msf>render-opts-oneline (msf>merge-with-current-opts (msf>read-module-opts candidate)))))))
             ("Start handler with defined options" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
-                 (msf>async-process "msf-handler" candidate (msf>render-opts-oneline (msf>merge-with-current-opts msf/user-opts)))))))
+                 (msf>async-process "msf-handler" candidate (msf>render-opts-oneline (msf>merge-with-current-opts msf/user-opts))))))
+            ("Generate payload" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>shell-command (concat "msf-module " candidate " \"generate "
+                                            (read-string (concat "Command line options for " candidate ": ")) "\";"))))))
           msf/module-actions)
   "MSF Payloads modules actions.")
 
