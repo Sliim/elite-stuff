@@ -87,7 +87,19 @@
              (msf/current-rhost (msf>get-host-from-services-candidate candidate))
              (msf/current-sname (msf>get-service-name-from-candidate candidate))
              (msf/current-ros (msf>get-os-name-from-candidate candidate)))
-         (helm-msf-search-exploits msf/current-sname)))))
+         (helm-msf-search-exploits msf/current-sname))))
+    ("Browse HTTP services in eww" .
+     (lambda (_candidate)
+       (dolist (candidate (helm-marked-candidates))
+         (let ((msf/current-rport (msf>get-port-from-services-candidate candidate))
+               (msf/current-rhost (msf>get-host-from-services-candidate candidate)))
+           (if (y-or-n-p (format "%s:%s - SSL? " msf/current-rhost msf/current-rport))
+               (setf scheme "https")
+             (setf scheme "http"))
+           (eww (format "%s://%s:%s"
+                        scheme
+                        (msf>get-host-from-services-candidate candidate)
+                        (msf>get-port-from-services-candidate candidate))))))))
   "MSF Services actions.")
 
 (defvar msf/c-source-services
