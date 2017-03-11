@@ -97,6 +97,10 @@
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
+            ("Launch module with defined options in new console" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-eshell-console candidate (msf>merge-with-current-opts msf/user-opts) "run -j"))))
             ("Set options and launch modules" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -117,6 +121,10 @@
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "exploit -j -z"))))
+            ("Launch module with defined options in new console" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-eshell-console candidate (msf>merge-with-current-opts msf/user-opts) "exploit -j -z"))))
             ("Set options and launch modules" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
@@ -137,6 +145,10 @@
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))
                  (msf>module-run-eshell-console candidate (msf>merge-with-current-opts (msf>read-module-opts candidate)) "run -j"))))
+            ("Launch module with defined options in new console" .
+             (lambda (_candidate)
+               (dolist (candidate (helm-marked-candidates))
+                 (msf>module-run-eshell-console candidate (msf>merge-with-current-opts msf/user-opts) "run -j"))))
             ("Launch module with defined options" .
              (lambda (_candidate)
                (dolist (candidate (helm-marked-candidates))

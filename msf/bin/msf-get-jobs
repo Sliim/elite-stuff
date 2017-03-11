@@ -26,14 +26,21 @@ def collect_data():
 
         append("%s - %s " % (jinfo.get("jid"),
                              jinfo.get("name")), False)
-        if jinfo.get("datastore").get("LPORT"):
-            append("- %s %s:%s" % (jinfo.get("datastore").get("PAYLOAD"),
-                                     jinfo.get("datastore").get("LHOST"),
-                                     jinfo.get("datastore").get("LPORT")), False)
-        elif jinfo.get("datastore").get("RPORT"):
-            append("- %s %s:%s" % (jinfo.get("datastore").get("PAYLOAD"),
-                                     jinfo.get("datastore").get("RHOST"),
-                                     jinfo.get("datastore").get("RPORT")), False)
+
+        payload = jinfo.get("datastore").get("PAYLOAD")
+        host = jinfo.get("datastore").get("RHOST")
+        if not host:
+            host = jinfo.get("datastore").get("RHOSTS")
+        if not host:
+            host = jinfo.get("datastore").get("SRVHOST")
+
+        port = jinfo.get("datastore").get("LPORT")
+        if not port:
+            port = jinfo.get("datastore").get("RPORT")
+        if not port:
+            port = jinfo.get("datastore").get("SRVPORT")
+
+        append("- %s %s:%s" % (payload, host, port), False)
         append("\n", False)
 
     append("----------\nTotal: %d" % total)
