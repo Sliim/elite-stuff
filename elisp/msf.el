@@ -372,7 +372,7 @@ Recurse only to depth MAXDEPTH.  If zero or negative, then do not recurse."
   (interactive)
   (let ((cmds '("msf-console"))
         (buffer-name (file-name-sans-extension (buffer-name))))
-    (add-to-list 'cmds (buffer-substring (point-min) (point-max)) t)
+    (setf cmds (append cmds (split-string (buffer-substring (point-min) (point-max)) "\n")))
     (msf>eshell-console cmds buffer-name)))
 
 (provide 'msf)
