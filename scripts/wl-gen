@@ -1,0 +1,30 @@
+#!/bin/bash
+
+up=$1
+
+if [[ $# -ne 1 ]]; then
+    echo >&2 "Usage: wl-gen <user pass file>"
+    exit 1
+fi
+if ! test -f $up;  then
+    echo >&2 "not a file: $up"
+    exit 2
+fi
+
+u=$(echo $up | sed "s/users_pass/users/")
+p=$(echo $up | sed "s/users_pass/pass/")
+
+users_pass=$(cat $up | sort -u)
+echo "$users_pass" > $up
+
+users=$(echo "$users_pass" | cut -d " " -f 1)
+pass=$(echo "$users_pass" | cut -d " " -f 2)
+
+echo "$users" >> $u
+echo "$pass" >> $p
+
+users=$(cat $u | sort -u)
+pass=$(cat $p | sort -u)
+
+echo "$users" > $u
+echo "$pass" > $p

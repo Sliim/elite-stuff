@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [[ $# < 2 ]]; then
+    echo >&2 "Usage: auto-john <hashes> <wordlists> [john-opts]"
+    exit 1
+fi
+
+john_opts=$3
+john=/opt/JohnTheRipper/run/john
+
+if [[ -f "$1" ]]; then
+    h_dir=$(dirname "$1")
+    hashes=$(basename "$1")
+else
+    h_dir="$1"
+    hashes=$(ls "$1")
+fi
+
+if [[ -f "$2" ]]; then
+    wl_dir=$(dirname "$2")
+    wordlists=$(basename "$2")
+else
+    wl_dir="$2"
+    wordlists=$(ls "$2")
+fi
+
+for h in $hashes; do
+    for w in $wordlists; do
+        if test -f "$wl_dir"/"$w"; then
+            echo "==== Hash: $h_dir/$h - Wordlist: $wl_dir/$w ======"
+            "$john" $john_opts "$h_dir"/"$h" --wordlist="$wl_dir"/"$w"
+        fi
+    done
+done
