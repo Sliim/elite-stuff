@@ -45,43 +45,78 @@
 
 (require 'msf)
 
+(defvar nmap-path "/usr/share/nmap"
+  "Nmap path.")
+
 (defvar helm-h4x0r/nmap-actions
-  '(("Run Nmap in msf console" .
+  '(("Execute in eshell" .
+     (lambda (candidate)
+       (let ((cmds '())
+             (opts (read-string "Nmap options: "))
+             (target (read-string "Target: ")))
+         (if (string-match "NSE" candidate)
+             (let ((execute-in "eshell"))
+               (helm-nse))
+           (progn
+             (add-to-list 'cmds (concat "nmap " opts " " target) t)
+             (msf>eshell-console cmds (concat "Nmap-" target)))))))
+    ("Execute in async shell" .
+     (lambda (candidate)
+       (let ((opts (read-string "Nmap options: "))
+             (target (read-string "Target: ")))
+         (if (string-match "NSE" candidate)
+             (let ((execute-in "async"))
+               (helm-nse))
+           (msf>async-process "nmap " opts " " target)))))
+    ("Execute with tmux" .
+     (lambda (candidate)
+       (let ((opts (read-string "Nmap options: "))
+             (target (read-string "Target: ")))
+         (if (string-match "NSE" candidate)
+             (let ((execute-in "tmux"))
+               (helm-nse))
+           (msf>tmux-run-and-wait (concat "nmap " opts " " target)))))))
+  "Nmap actions.")
+
+(defvar helm-h4x0r/nse-actions
+  '(("Execute" .
+     (lambda (_candidate)
+       (let ((cmds '())
+             (candidate (mapconcat 'identity (helm-marked-candidates) ",")))
+         (when (string-match "eshell" execute-in)
+           (add-to-list 'cmds (concat "nmap --script=" candidate " " opts " " target) t)
+           (msf>eshell-console cmds (concat "Nmap-" target)))
+         (when (string-match "async" execute-in)
+           (msf>async-process "nmap --script=" candidate " " opts " " target))
+         (when (string-match "tmux" execute-in)
+           (msf>tmux-run-and-wait (concat "nmap --script=" candidate " " opts " " target))))))
+    ("Open" .
      (lambda (_candidate)
        (dolist (candidate (helm-marked-candidates))
-         (when (string-match "MSFConsole" candidate)
-           (let ((cmds '("msf-console"))
-                 (opts (read-string "Nmap options: "))
-                 (target (read-string "Target: ")))
-             (add-to-list 'cmds (concat "db_nmap " opts " " target) t)
-             (msf>eshell-console cmds (concat "MSFConsole-Nmap-" target))))
-         (when (string-match "Eshell" candidate)
-           (let ((cmds '())
-                 (opts (read-string "Nmap options: "))
-                 (target (read-string "Target: ")))
-             (add-to-list 'cmds (concat "nmap " opts " " target) t)
-             (msf>eshell-console cmds (concat "Nmap-" target))))
-         (when (string-match "AsyncShell" candidate)
-           (let ((opts (read-string "Nmap options: "))
-                 (target (read-string "Target: ")))
-             (msf>async-process "nmap" opts target)))
-         (when (string-match "Tmux" candidate)
-           (let ((opts (read-string "Nmap options: "))
-                 (target (read-string "Target: ")))
-             (msf>tmux-run-and-wait (concat "nmap " opts " " target))))))))
-  "Nmap actions.")
+         (find-file (nse-script-path candidate))))))
+    "NSE actions.")
 
 (defvar helm-h4x0r/c-source-nmap
   (helm-build-in-buffer-source "H4x0r Nmap Commands"
     :init (lambda ()
-            (let ((cmds '("[MSFConsole] Run nmap"
-                          "[Eshell] Run nmap"
-                          "[AsyncShell] Run nmap"
-                          "[Tmux] Run nmap")))
+            (let ((cmds '("Execute Nmap command"
+                          "Execute NSE script")))
               (with-current-buffer (helm-candidate-buffer 'local)
                 (insert (mapconcat 'identity cmds "\n")))))
     :action helm-h4x0r/nmap-actions)
   "Nmap commands helm source definition.")
+
+(defvar helm-h4x0r/c-source-nse
+  (helm-build-in-buffer-source "H4x0r NSE Scripts"
+    :init (lambda ()
+            (with-current-buffer (helm-candidate-buffer 'local)
+              (insert (mapconcat 'identity (directory-files (concat nmap-path "/scripts")) "\n"))))
+    :action helm-h4x0r/nse-actions)
+  "NSE scripts helm source definition.")
+
+(defun nse-script-path (script)
+  "Return nse SCRIPT path."
+  (concat nmap-path "/scripts/" script))
 
 ;;;###autoload
 (defun helm-h4x0r ()
@@ -90,7 +125,16 @@
   (helm :sources '(helm-h4x0r/c-source-nmap)
         :candidate-number-limit 9999
         :buffer "*helm-h4x0r*"
-        :prompt "Command> "
+        :prompt "command> "
+        :full-frame nil))
+
+(defun helm-nse ()
+  "Helm Nmap NSE scripts."
+  (interactive)
+  (helm :sources '(helm-h4x0r/c-source-nse)
+        :candidate-number-limit 9999
+        :buffer "*helm-nse*"
+        :prompt "script> "
         :full-frame nil))
 
 (provide 'helm-h4x0r)
